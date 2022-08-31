@@ -1,3 +1,80 @@
+Creating a live system involves the following steps:
+
+All the tools in this kit should be run out of the 'main' SlakResQ directory
+-- that is, the directory this README is found in -- and must be run as root.
+
+0) First, look at live/config and see if there are any settings you want to
+change. These are the settings used by the Linux Live Kit build script, and
+not specific to SlakResQ.
+
+1) Next, you will need to populate the install/ directory. This should contain
+the disksets you want to include in the final image. This should contain
+disksets out of the slackeware/ or slackware64/ directory off the Slackware
+installer, such as 'a', 'ap', 'x', etc.
+
+2) Next, run tools/mkbase. This will 'install' a base Slackware system into the
+base/ directory. Actually, what is does is just run 'installpkg' on the
+appropriate packages, into base/. This step requires pkgtools, naturally; it
+is intended to be run on a Slackware system, but installing pkgtools on
+another Linux system may work; this is completely untested.
+
+By default, this will install disksets a, ap, and l. This is the minimum
+required to produce a bootable system, including tools and libraries needed by
+the Linux Live Kit script. In the future, you may be able to install just a,
+with a few packages needed by the script.
+
+If you want to make any changes to the system before turning it into a
+bootable image, now is the time. Edit the files in base/ as desired before
+continuing onto the next step.
+
+3) Next, run tools/buildlive. This will set up the Linux Live Kit in the base
+directory, mount some system partitions, call the scripts, and move the
+results into the target/ directory. Note that Linux Live Kit is intended to be
+run inside a 'running' Linux install; we emulate this by mounting necessary
+partitions, and chroot-ing into the base and running the script from there.
+
+At this point, you will have a live system that can be copied to a USB stick,
+and booted on an EFI-capable system.
+
+4) You'll probably want more than just the basic system, so now you can make
+'bundles' with additional functionality. A 'bundle' is basically a squashfs
+filesystem image, which will be mixed into the root directory when the live
+system boots. You can configure bundles in any number of ways, but this is the
+default:
+
+Diskset 'n' goes into the 10-net bundle
+Disksets 'd', 'e', and 'tcl' go into the 20-dev bundle
+Disksets 'x', 'xap', and 'xfce' go into the 90-x11 bundle
+Diskset 'kde' goes into the 95-kde bundle
+
+To create a bundle, run tools/extdiskset with the bundle name as the first
+parameter, and the desired disksets as the remaining parameters. The commands
+to make the above bundles will look something like this:
+
+tools/extdiskset 10-net n
+tools/extdiskset 20-dev d e tcl
+tools/extdiskset 90-x11 x xap xfce
+tools/extdiskset 95-kde kde
+
+This will create a directory in trees/ for each bundle. You can modify the
+content of these file trees before compressing them into a squashfs image if
+you wish.
+
+There is also a 99-patches directory as well; this is a bundle that is loaded
+after everything else. It contains changes particular to SlakResQ, rather than
+modifying the original slackware disksets themselves. You can add your own
+changes to this as well if you so desire.
+
+5) Finally, you can run tools/squashbundle to compress each folder in trees/
+into the appropriate bundle file in target/. You can specify which bundles you
+want to compress on the command line, or run it without parameters to compress
+all of them.
+
+This will add the bundles to the existing live system in target/, so you can
+make changes to a single bundle and re-compress it without having to recreate
+the whole system.
+
+
 base
     The root filesystem for the core bundle
 diff
