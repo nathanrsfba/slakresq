@@ -12,6 +12,11 @@ the disksets you want to include in the final image. This should contain
 disksets out of the slackeware/ or slackware64/ directory off the Slackware
 installer, such as 'a', 'ap', 'x', etc.
 
+You might also want to download any available security updates (found in the
+patches/packages directory in the Slackware mirrors) and place them in
+updates/, and run the tools/updatepkgs script. This will update packages in
+install/ with packages from updates/.
+
 2) Next, run tools/mkbase. This will 'install' a base Slackware system into the
 base/ directory. Actually, what is does is just run 'installpkg' on the
 appropriate packages, into base/. This step requires pkgtools, naturally; it
@@ -96,7 +101,8 @@ tools
 trees
     Root filesystem updates for each bundle
 updates
-    Slackware package updates (TBI)
+    Slackware package updates. The tools/updatepkgs script will replace
+    packages in the install/ folder with newer versions out of here.
 
 
 

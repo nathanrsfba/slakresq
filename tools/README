@@ -31,6 +31,21 @@ finddupes
     You may wish to run this before squashing the bundles, and examining the
     resulting list to see if any conflicts need to be addressed.
 
+updatepkgs
+    This will update the packages in the install/ directory with packages
+    found in the updates/ directory. You can find updates in the
+    slackware64/patches/packages directory in the Slackware mirrors.
+
+    The following command line arguments are supported:
+
+    -v: Verbose. Displays what packages are being updated, the old and new
+    versions, and what packages are already up to date, or weren't found in
+    the install tree (normal if you don't have all the disksets). By default,
+    only outputs the names of packages that are updated.
+    -q: Quiet. Don't display anything at all
+    -t: Test. Don't make any changes, just display what would be updated. Note
+    that specifying this with -q would just be silly.
+
 squashbundle
     Squshes a bundle (or set of bundles) in trees into a bundle file.
     Parameters are the name(s) of the bundle(s) to squash (minus file

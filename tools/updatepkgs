@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# Updates any packages in the install/ folder with versions in the updates/ directory.
+# Old files will be retained with an extension of .old. To clean these out, do
+# rm install/*/*.old
+
+while getopts "tqv?" opt; do
+    if [ $opt = 't' ]; then
+        TEST=1
+    elif [ $opt = 'v' ]; then
+        VERBOSE=1
+    elif [ $opt = 'q' ]; then
+        QUIET=1
+    elif [ $opt = '?' ]; then
+        echo Usage: $0 [-t] [-v]
+        echo ''
+        echo "-t: Test: Display what would be done without making changes"
+        echo "-v: Verbose: Display more information"
+        echo "-q: Quiet: Update packages without output"
+        exit
+    fi
+done
+
+# Return a package name that has been stripped of the dirname portion
+# and any of the valid extensions (only):
+pkgbase() {
+  # basename + strip extensions .tbz, .tgz, .tlz and .txz
+  echo "$1" | sed 's?.*/??;s/\.t[bglx]z$//'
+}
+
+# Strip version, architecture and build from the end of the name
+package_name() {
+  pkgbase $1 | sed 's?-[^-]*-[^-]*-[^-]*$??'
+}
+
+# Try to find an old package in install/ with the given name
+findpkg() {
+    for pkg in install/*/$1-*.t?z; do
+        pkgname=`package_name $pkg`
+        if [ $pkgname = $1 ]; then
+            echo $pkg
+            return 0
+        fi
+    done
+    return 1
+}
+
+for pkg in updates/*.t?z; do
+    pkgname="`package_name $pkg`"
+    old="`findpkg $pkgname`"
+    if [ x$old != x ]; then
+        oldbase="`pkgbase $old`"
+        newbase="`pkgbase $pkg`"
+
+        if [ $oldbase = $newbase ]; then
+            if [ $VERBOSE ]; then
+                echo "Up To Date: $pkgname"
+            fi
+        else
+            if [ $VERBOSE ]; then
+                echo "Updating  : $oldbase --> $newbase"
+            elif [ ! $QUIET ]; then
+                echo "$pkgname"
+            fi
+
+            if [ ! $TEST ]; then
+                oldpath="`dirname $old`"
+                mv "$old" "$old.old" || exit 1
+                mv "$old.asc" "$old.asc.old" || exit 1
+                mv "$oldpath/$oldbase.txt" "$oldpath/$oldbase.txt.old" || exit 1
+                newpath="`dirname $pkg`"
+                cp "$pkg" "$oldpath" || exit 1
+                cp "$pkg.asc" "$oldpath" || exit 1
+                cp "$newpath/$newbase.txt" $oldpath || exit 1
+            fi
+        fi
+    else
+        if [ $VERBOSE ]; then
+            echo "Not found : $pkgname"
+        fi
+    fi
+done
+
