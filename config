@@ -1,3 +1,11 @@
 # Which disksets to use in the core bundle
 CORE_DISKSETS="a ap l"
 
+# What optional bundles to build
+BUNDLES="10-net 20-dev 90-x11 95-kde 99-patches"
+
+# The disksets to go in each bundle
+BND_10-net="n"
+BND_20-dev="d e tcl"
+BND_90-x11="x xap xfce"
+BND_95-kde="kde"
