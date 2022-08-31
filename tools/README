@@ -1,0 +1,42 @@
+Scripts in this folder:
+
+mkbase
+    Create the base filesystem for the core bundle. By default, this includes
+    disksets a, ap and l, which is the minimum required for the Linux Live Kit
+    script to run. To use a different set, pass the disksets you want on the
+    command line, or change the option in the config file.
+
+    It may be possible to build with just diskset a, if you move the necessary
+    packages out of ap and l into a (mksquashfs, mkisofs, and their
+    dependencies). This is untested, and I still need to work out exactly what
+    packages are needed.
+
+buildlive
+    Creates the SlakResQ tree in target/. This will not re-create target,
+    but will instead will update any changed files, and leave anything
+    else intact.
+
+extdiskset
+    Extracts a set of disksets, and saves the resulting filesystem tree into
+    trees/. This uses overlayfs to mount a filesystem overtop base/, this
+    saving only the files changed by installing the given disksets.
+
+    The first parameter should be the name of the resulting bundle (minus file
+    extension), the rest should be a list of disksets to install. Ex:
+
+        tools/extdiskset 20-dev d e tcl
+
+finddupes
+    This displays a list of all files that appear in multiple bundle trees.
+    You may wish to run this before squashing the bundles, and examining the
+    resulting list to see if any conflicts need to be addressed.
+
+squashbundle
+    Squshes a bundle (or set of bundles) in trees into a bundle file.
+    Parameters are the name(s) of the bundle(s) to squash (minus file
+    extension). Ex:
+
+        tools/squashbundle 10-net 20-dev 90-x11
+
+    By default, creates bundles out of all folders in trees/
+

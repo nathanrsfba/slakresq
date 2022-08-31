@@ -1,0 +1,13 @@
+*~
+.*.swp
+
+/base/*
+/diff/*
+/install/*
+/merged/*
+/target/*
+/tmp
+/trees/*
+!/trees/99-patches
+
+

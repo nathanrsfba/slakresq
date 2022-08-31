@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Find files that exist in multiple bundle trees, so that 
+# potential conflicts might be addressed
+
+cd trees
+for d in */; do 
+    (cd $d; find \! -type d)
+done | sort | uniq -d

@@ -1,0 +1,3 @@
+# Which disksets to use in the core bundle
+CORE_DISKSETS="a ap l"
+

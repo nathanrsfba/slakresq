@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# If we don't have the X bundle loaded, just back to runlevel 3
+
+if [ ! -x /usr/bin/startx ]; then
+	echo "X11 not installed; switching runlevel..."
+	telinit 3
+	exit
+fi
+
+# Check if the root account has a password. If not, start X directly with startx
+# Otherwise, deactivate ourselves and kick control back to rc.4
+
+if head -1 /etc/shadow | grep ^root:: -q; then
+	exec su --login -c startx
+else
+	chmod a-x /etc/rc.d/rc.4.local
+	exec /etc/rc.d/rc.4
+fi

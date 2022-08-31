@@ -1,0 +1,20 @@
+slackware:gcc
+slackware:gcc-g[+][+]
+slackware:glibc
+slackware:make
+slackware:flex
+slackware:binutils
+slackware:guile
+slackware:gc
+slackware:nasm
+slackware:pkg-config
+slackware:libmpc
+slackware:mpfr
+slackware:yasm
+slackware:elfutils
+slackware:ncurses
+slackware:kernel-headers
+slackware:libffi
+
+# X header files
+slackware:xorgproto

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Try to start the following desktop environments, in this order
+for env in gnome kde xfce wmaker fvwm2 twm; do
+	if [ -x /etc/X11/xinit/xinitrc.$env ]; then
+		exec /etc/X11/xinit/xinitrc.$env
+	fi
+done
+
+echo "Couldn't find any desktop environment installed!"
+return 1

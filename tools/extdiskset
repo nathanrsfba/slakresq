@@ -1,0 +1,47 @@
+#!/bin/bash
+
+. live/config
+. config
+
+if [ x$2 = x ]; then
+    echo "Usage: $0 bundle_name diskset [diskset...]"
+    exit
+fi
+
+bundle=$1
+shift
+disksets="$*"
+
+echo "Setting up install environment..."
+
+# Create the diff directory if necessary, and clear the work directory
+rm -rf diff/work || exit 1
+mkdir -p diff/data diff/work || exit 1
+
+(
+
+# Mount the overlay
+mount -t overlay -o lowerdir=base,upperdir=diff/data,workdir=diff/work overlay merged || exit 1
+
+# Mount stuff the environment needs
+mount -t proc proc merged/proc || exit 1
+mount -t devtmpfs devtmpfs merged/dev || exit 1
+mount -t devpts devpts merged/dev/pts || exit 1
+
+# Make install folder available in build environment
+mount --bind install merged/mnt/hd || exit 1
+
+for disk in $disksets; do
+    echo "Installing diskset $disk"
+    chroot merged /sbin/installpkg --terse /mnt/hd/$disk/*.t?z || exit 1
+done
+
+mv diff/data trees/$bundle
+)
+
+echo "Cleaning up..."
+
+# Unmount everything
+umount merged/dev/pts merged/dev merged/proc merged/mnt/hd merged
+
+

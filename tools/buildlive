@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Prepare to build the Linux Live base image
+
+. live/config
+. config
+
+if [ `whoami` != root ]; then
+    echo "Error: We are not root"
+    exit 1
+fi
+ 
+# Make the Linux Live script available in the base filesystem
+mkdir -p base/live || exit 1
+mount --bind live base/live || exit 1
+
+# Mount system filesystems in base filesystem
+mount -t devtmpfs devtmpfs base/dev || exit 1
+mount -t devpts devpts base/dev/pts || exit 1
+mount -t proc proc base/proc || exit 1
+
+(
+# Cleanup any old builds
+rm -rf base/tmp/$LIVEKITNAME-data-*
+
+# Build the system
+chroot base /live/build || exit 1
+
+# Copy new build into target
+mkdir -p target || exit 1
+cp -a base/tmp/$LIVEKITNAME-data-*/* target || exit 1
+
+# Move EFI bootloader to appropriate place
+rm -rf target/EFI
+mv target/$LIVEKITNAME/boot/EFI target || exit 1
+)
+
+# Cleanup
+umount base/dev/pts base/dev base/proc base/live
+

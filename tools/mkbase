@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Install a base Slackware system into the base/ directory
+
+. config
+
+if [ `whoami` != root ]; then
+    echo "Error: We are not root"
+    exit 1
+fi
+ 
+DISKSETS="$CORE_DISKSETS"
+
+if [ x$1 != x ]; then
+    DISKSETS="$*"
+fi
+
+# Start from scratch
+echo "Cleaning up old files..."
+rm -rf base || exit 1
+mkdir base || exit 1
+
+for diskset in $DISKSETS; do
+    echo "Installing diskset $diskset..."
+    installpkg --root base --terse install/$diskset/*.t?z || exit 1
+done
+
+chroot base /sbin/ldconfig
+
+echo Done.

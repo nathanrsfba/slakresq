@@ -1,0 +1,26 @@
+base
+    The root filesystem for the core bundle
+diff
+    Place to save changes from the core bundle to make subsequent bundles.
+    diff/data contains filesystem changes, diff/work is temporary directory
+    for overlayfs
+install
+    Slackware install disksets. You will need to provide these for whatever
+    packages you want in your install
+live
+    Linux Live kit scripts. Feel free to update this if there's a newer
+    version
+merged
+    Mount point for merged overlayfs filesystem
+target
+    File tree for final image
+tools
+    Scripts used to create the image
+trees
+    Root filesystem updates for each bundle
+updates
+    Slackware package updates (TBI)
+
+
+
+
