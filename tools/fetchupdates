@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Download updates from the configured mirror
+
+. config || exit 1
+
+mirrorbase="`dirname $MIRROR`"
+
+mkdir -p updates || exit 1
+
+echo "Checking for updates"
+lftp -c mirror -ev "$mirrorbase/patches/packages" updates || exit 1

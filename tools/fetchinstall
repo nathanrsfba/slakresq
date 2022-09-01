@@ -1,0 +1,19 @@
+#!/bin/bash
+
+. config || exit 1
+
+disksets="$CORE_DISKSETS"
+
+for bundle in $BUNDLES; do
+    disksets="$disksets ${BUNDLE[$bundle]}"
+done
+
+mkdir -p install || exit 1
+
+for diskset in $disksets; do
+    if [ ! -d install/$diskset ]; then
+        echo "Downloading diskset $diskset..."
+        lftp -c mirror -ev "$MIRROR/$diskset" install/$diskset || exit 1
+    fi
+done
+
