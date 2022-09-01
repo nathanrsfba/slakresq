@@ -3,7 +3,7 @@
 . config || exit 1
 
 if [ $FETCHINSTALL ]; then
-    echo tools/fetchinstall || exit 1
+    tools/fetchinstall || exit 1
 else
     if [ ! -d install/a ]; then
         echo "No disksets are present in the install/ directory. Either populate it"
@@ -14,7 +14,7 @@ else
 fi
 
 if [ $FETCHUPDATES ]; then
-    echo tools/fetchupdates || exit 1
+    tools/fetchupdates || exit 1
 fi
 
 if [ $INSTALLUPDATES ]; then
@@ -22,14 +22,14 @@ if [ $INSTALLUPDATES ]; then
         echo "Requested updates, but no updates present. Skipped."
     else
         echo "Installing any pending updates..."
-        echo tools/updatepkgs || exit 1
+        tools/updatepkgs || exit 1
     fi
 fi
 
 tools/mkbase || exit 1
 tools/buildlive || exit 1
 tools/prepbundles || exit 1
-tools/squashbundles || exit 1
+tools/squashbundle || exit 1
 
 echo "Done."
 
