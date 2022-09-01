@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Extract files for all configured bundles into trees/
+
+. config || exit 1
+
+for bundle in $BUNDLES; do
+    disksets="${BUNDLE[$bundle]}"
+    if [ "x$disksets" != x ]; then
+	echo "Extracting files for bundle $bundle..."
+        tools/extdiskset $bundle $disksets || exit 1
+    fi
+done
