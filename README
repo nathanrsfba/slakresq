@@ -1,3 +1,10 @@
+This is SlakResQ: A set of scripts for creating a (more or less) full
+Slackware bootable USB stick using the Linux Live Kit.
+
+Currently, this only supports booting from a USB stick using an EFI-capable
+bios. Bootable CD and syslinux-style booting may be supported in the future.
+
+
 Creating a live system involves the following steps:
 
 All the tools in this kit should be run out of the 'main' SlakResQ directory
@@ -91,7 +98,12 @@ install
     packages you want in your install
 live
     Linux Live kit scripts. Feel free to update this if there's a newer
-    version
+    version. However, make sure to preserve the following files in the live/
+    folder, as they have been edited for SlakResQ:
+
+    config
+    bootfiles/bootlogo.png
+    bootfiles/syslinux.cfg
 merged
     Mount point for merged overlayfs filesystem
 target
