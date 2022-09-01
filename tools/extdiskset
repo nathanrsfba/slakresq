@@ -16,7 +16,7 @@ echo "Setting up install environment..."
 
 # Create the diff directory if necessary, and clear the work directory
 rm -rf diff/work || exit 1
-mkdir -p diff/data diff/work || exit 1
+mkdir -p diff/data diff/work merged || exit 1
 
 (
 

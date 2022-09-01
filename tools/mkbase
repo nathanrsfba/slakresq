@@ -9,6 +9,8 @@ if [ `whoami` != root ]; then
     exit 1
 fi
  
+echo "Installing base system into base ..."
+
 DISKSETS="$CORE_DISKSETS"
 
 if [ x$1 != x ]; then

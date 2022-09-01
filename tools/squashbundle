@@ -11,10 +11,12 @@ if [ x$bundles = x ]; then
 fi
 
 for bundle in $bundles; do
-(
-cd trees/$bundle || exit 1
-mksquashfs . ../../target/$LIVEKITNAME/"$bundle.srq" \
-    -comp xz -b 1024K -Xbcj x86 -always-use-fragments
-)
+    echo "Compressing bundle $bundle..."
+    (
+    cd trees/$bundle || exit 1
+    rm -f ../../target/$LIVEKITNAME/"$bundle.srq"
+    mksquashfs . ../../target/$LIVEKITNAME/"$bundle.srq" \
+        -comp xz -b 1024K -Xbcj x86 -always-use-fragments
+    )
 done
 

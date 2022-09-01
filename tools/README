@@ -26,6 +26,16 @@ extdiskset
 
         tools/extdiskset 20-dev d e tcl
 
+fetchinstall
+    Downloads all installer disksets into install/ from the mirror specified
+    in the config. Note that this does not attempt to download any diskset that
+    already appears to exist, so as to not remove any potentially updated
+    packages
+
+fetchinstall
+    Downloads updates from the configured mirror site. Unlike fetchinstall,
+    this *does* attempt to update an existing updates directory
+
 finddupes
     This displays a list of all files that appear in multiple bundle trees.
     You may wish to run this before squashing the bundles, and examining the

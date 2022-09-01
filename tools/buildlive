@@ -10,6 +10,8 @@ if [ `whoami` != root ]; then
     exit 1
 fi
  
+echo "Building the live boot image..."
+
 # Make the Linux Live script available in the base filesystem
 mkdir -p base/live || exit 1
 mount --bind live base/live || exit 1
