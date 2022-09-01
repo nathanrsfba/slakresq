@@ -4,8 +4,25 @@ CORE_DISKSETS="a ap l"
 # What optional bundles to build
 BUNDLES="10-net 20-dev 90-x11 95-kde 99-patches"
 
-# The disksets to go in each bundle
-BND_10-net="n"
-BND_20-dev="d e tcl"
-BND_90-x11="x xap xfce"
-BND_95-kde="kde"
+# The disksets to go in each bundle. If a bundle doesn't specify any disksets,
+# no disksets will be installed for that bundle. In this event, it is assumed
+# the files for the bundle will be populated in trees/ beforehand. (This is
+# true of 99-patches)
+
+BUNDLE[10-net]="n"
+BUNDLE[20-dev]="d e tcl"
+BUNDLE[90-x11]="x xap xfce"
+BUNDLE[95-kde]="kde"
+
+# Automatically download the install disksets
+FETCHINSTALL=1
+
+# Automatically download updates when building
+FETCHUPDATES=1
+
+# Install updates before building
+INSTALLUPDATES=1
+
+# Slackware mirror to download files from. Should point to the directory with
+# disksets
+MIRROR="ftp://localhost/slackware/slackware64-15.0/slackware64"
