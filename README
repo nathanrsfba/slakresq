@@ -10,6 +10,14 @@ Creating a live system involves the following steps:
 All the tools in this kit should be run out of the 'main' SlakResQ directory
 -- that is, the directory this README is found in -- and must be run as root.
 
+If you want to start an automated build process that will download and build
+everything, just run tools/mkall. You might want to edit the config file to
+control what all this will do.
+
+You can also go through the build one step at a time. You have a bit more
+control over the process, and can customize it a little more. That looks
+something like the following:
+
 0) First, look at live/config and see if there are any settings you want to
 change. These are the settings used by the Linux Live Kit build script, and
 not specific to SlakResQ.
