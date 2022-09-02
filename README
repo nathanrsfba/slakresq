@@ -70,7 +70,7 @@ filesystem image, which will be mixed into the root directory when the live
 system boots. You can configure bundles in any number of ways, but this is the
 default:
 
-Disksets ap, n, l, and y goes into the 10-console bundle
+Disksets ap, f, n, l, and y goes into the 10-console bundle
 Disksets d, e, and tcl go into the 20-dev bundle
 Disksets x, xap, and xfce go into the 90-x11 bundle
 Diskset kde goes into the 95-kde bundle
@@ -79,7 +79,7 @@ To create a bundle, run tools/extdiskset with the bundle name as the first
 parameter, and the desired disksets as the remaining parameters. The commands
 to make the above bundles will look something like this:
 
-tools/extdiskset 10-console ap n l y
+tools/extdiskset 10-console ap f n l y
 tools/extdiskset 20-dev d e tcl
 tools/extdiskset 90-x11 x xap xfce
 tools/extdiskset 95-kde kde

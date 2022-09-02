@@ -13,7 +13,7 @@ BUNDLES="10-console 20-dev 90-x11 95-kde 99-patches"
 # the files for the bundle will be populated in trees/ beforehand. (This is
 # true of 99-patches)
 
-BUNDLE[10-net]="ap l n y"
+BUNDLE[10-net]="ap f l n y"
 BUNDLE[20-dev]="d e tcl"
 BUNDLE[90-x11]="x xap xfce"
 BUNDLE[95-kde]="kde"
