@@ -7,6 +7,8 @@ SUPPORT_PKGS="squashfs-tools lzo lz4 cdrtools"
 
 # What optional bundles to build
 BUNDLES="10-console 20-dev 90-x11 95-kde 99-patches"
+# If you want to include the kernel source and TeX:
+# BUNDLES="10-console 20-dev 30-ksrc 30-tex 90-x11 95-kde 99-patches"
 
 # The disksets to go in each bundle. If a bundle doesn't specify any disksets,
 # no disksets will be installed for that bundle. In this event, it is assumed
@@ -15,6 +17,8 @@ BUNDLES="10-console 20-dev 90-x11 95-kde 99-patches"
 
 BUNDLE[10-net]="ap f l n y"
 BUNDLE[20-dev]="d e tcl"
+BUNDLE[30-ksrc]="k"
+BUNDLE[30-tex]="t"
 BUNDLE[90-x11]="x xap xfce"
 BUNDLE[95-kde]="kde"
 
