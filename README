@@ -38,10 +38,11 @@ appropriate packages, into base/. This step requires pkgtools, naturally; it
 is intended to be run on a Slackware system, but installing pkgtools on
 another Linux system may work; this is completely untested.
 
-By default, this will install disksets a, ap, and l. This is the minimum
-required to produce a bootable system, including tools and libraries needed by
-the Linux Live Kit script. In the future, you may be able to install just a,
-with a few packages needed by the script.
+By default, this will install just diskset a, plus a few packages out of ap
+and l. This is the minimum required to produce a bootable system, plus
+tools and libraries needed by the Linux Live Kit script. You can configure
+which extra packages are installed with the SUPPORT_PKGS variable. If your
+core includes both ap and l, you can comment this line out.
 
 If you want to make any changes to the system before turning it into a
 bootable image, now is the time. Edit the files in base/ as desired before

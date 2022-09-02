@@ -2,14 +2,14 @@ Scripts in this folder:
 
 mkbase
     Create the base filesystem for the core bundle. By default, this includes
-    disksets a, ap and l, which is the minimum required for the Linux Live Kit
-    script to run. To use a different set, pass the disksets you want on the
-    command line, or change the option in the config file.
+    just diskset a, plus a few packages out of ap and l, which is the minimum
+    required for the Linux Live Kit script to run. To use a different set,
+    pass the disksets you want on the command line, or change the option in
+    the config file.
 
-    It may be possible to build with just diskset a, if you move the necessary
-    packages out of ap and l into a (mksquashfs, mkisofs, and their
-    dependencies). This is untested, and I still need to work out exactly what
-    packages are needed.
+    You can configure which extra packages are installed with the SUPPORT_PKGS
+    variable. If your core includes both ap and l, you can comment this line
+    out.
 
 buildlive
     Creates the SlakResQ tree in target/. This will not re-create target,

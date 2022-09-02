@@ -1,18 +1,25 @@
 # Which disksets to use in the core bundle
-CORE_DISKSETS="a ap l"
+CORE_DISKSETS="a"
+
+# Packages out of ap or l that are needed for the Linux Live Kit build script.
+# Use this if your core diskset doesn't include ap and l
+SUPPORT_PKGS="squashfs-tools lzo lz4 cdrtools"
 
 # What optional bundles to build
-BUNDLES="10-net 20-dev 90-x11 95-kde 99-patches"
+BUNDLES="10-console 20-dev 90-x11 95-kde 99-patches"
 
 # The disksets to go in each bundle. If a bundle doesn't specify any disksets,
 # no disksets will be installed for that bundle. In this event, it is assumed
 # the files for the bundle will be populated in trees/ beforehand. (This is
 # true of 99-patches)
 
-BUNDLE[10-net]="n"
+BUNDLE[10-net]="ap l n y"
 BUNDLE[20-dev]="d e tcl"
 BUNDLE[90-x11]="x xap xfce"
 BUNDLE[95-kde]="kde"
+
+# Install Slackware's pkgtools on your system if it's not present
+INSTALLPKGTOOLS=1
 
 # Automatically download the install disksets
 FETCHINSTALL=1

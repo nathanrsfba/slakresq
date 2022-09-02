@@ -27,6 +27,12 @@ for diskset in $DISKSETS; do
     installpkg --root base --terse install/$diskset/*.t?z || exit 1
 done
 
+if [ "x$SUPPORT_PKGS" != x ]; then
+    echo "Installing support packages for Linux Live Kit..."
+    for pkg in $SUPPORT_PKGS; do
+        installpkg --root base --terse install/*/$pkg-*.t?z || exit 1
+    done
+fi
 chroot base /sbin/ldconfig
 
 echo Done.
