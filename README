@@ -4,11 +4,18 @@ Slackware bootable USB stick using the Linux Live Kit.
 Currently, this only supports booting from a USB stick using an EFI-capable
 bios. Bootable CD and syslinux-style booting may be supported in the future.
 
+Some notes:
+* All the tools in this kit should be run out of the 'main' SlakResQ directory
+  -- that is, the directory this README is found in
+* The tools must be run as root. If you're su-ing or sudo-ing from a non-root
+  user, you may wish to ensure that /sbin and /usr/sbin are in your path.
+* This process requires Slackware's pkgtools to be installed. If you're
+  running on a Slackware system, obviously this will already be present. If
+  not, you'll need to install them manually. In the future, there may be a
+  script to take care of this for you.
+* This process requires support for overlayfs in order to build the bundles.
 
 Creating a live system involves the following steps:
-
-All the tools in this kit should be run out of the 'main' SlakResQ directory
--- that is, the directory this README is found in -- and must be run as root.
 
 If you want to start an automated build process that will download and build
 everything, just run tools/mkall. You might want to edit the config file to
@@ -63,16 +70,16 @@ filesystem image, which will be mixed into the root directory when the live
 system boots. You can configure bundles in any number of ways, but this is the
 default:
 
-Diskset 'n' goes into the 10-net bundle
-Disksets 'd', 'e', and 'tcl' go into the 20-dev bundle
-Disksets 'x', 'xap', and 'xfce' go into the 90-x11 bundle
-Diskset 'kde' goes into the 95-kde bundle
+Disksets ap, n, l, and y goes into the 10-console bundle
+Disksets d, e, and tcl go into the 20-dev bundle
+Disksets x, xap, and xfce go into the 90-x11 bundle
+Diskset kde goes into the 95-kde bundle
 
 To create a bundle, run tools/extdiskset with the bundle name as the first
 parameter, and the desired disksets as the remaining parameters. The commands
 to make the above bundles will look something like this:
 
-tools/extdiskset 10-net n
+tools/extdiskset 10-console ap n l y
 tools/extdiskset 20-dev d e tcl
 tools/extdiskset 90-x11 x xap xfce
 tools/extdiskset 95-kde kde
@@ -80,6 +87,9 @@ tools/extdiskset 95-kde kde
 This will create a directory in trees/ for each bundle. You can modify the
 content of these file trees before compressing them into a squashfs image if
 you wish.
+
+You can also just run tools/prepbundles, which will setup the default bundles,
+according to the settings in config.
 
 There is also a 99-patches directory as well; this is a bundle that is loaded
 after everything else. It contains changes particular to SlakResQ, rather than
@@ -96,6 +106,10 @@ make changes to a single bundle and re-compress it without having to recreate
 the whole system.
 
 
+## Directories ##
+
+The following subdirectores may be found in this directory:
+
 base
     The root filesystem for the core bundle
 diff
@@ -110,9 +124,9 @@ live
     version. However, make sure to preserve the following files in the live/
     folder, as they have been edited for SlakResQ:
 
-    config
-    bootfiles/bootlogo.png
-    bootfiles/syslinux.cfg
+        config
+        bootfiles/bootlogo.png
+        bootfiles/syslinux.cfg
 merged
     Mount point for merged overlayfs filesystem
 target
