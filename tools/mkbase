@@ -2,14 +2,32 @@
 
 # Install a base Slackware system into the base/ directory
 
-. config
+. config || exit 1
 
 if [ `whoami` != root ]; then
     echo "Error: We are not root"
     exit 1
 fi
  
-echo "Installing base system into base ..."
+if [ ! -e initrd.img ]; then
+    echo "Missing Slackware installer image."
+    echo "Please retrieve initrd.img from a Slackware mirror, in"
+    echo "the isolinux/ directory, and place it in the main directory"
+    echo "or run tools/fetchinstall"
+    exit 1
+fi
+
+echo "Extracting Slackware install environment..."
+
+rm -rf instenv || exit 1
+mkdir instenv
+(cd instenv; unxz < ../initrd.img | cpio -i) || exit 1
+
+# Mount required filesystems for install environment
+mount --bind install instenv/var/log/mount || exit 1
+mount -t devtmpfs devtmpfs instenv/dev || exit 1
+mount -t devpts devpts instenv/dev/pts || exit 1
+mount -t proc proc instenv/proc || exit 1
 
 DISKSETS="$CORE_DISKSETS"
 
@@ -17,22 +35,34 @@ if [ x$1 != x ]; then
     DISKSETS="$*"
 fi
 
+(
 # Start from scratch
 echo "Cleaning up old files..."
 rm -rf base || exit 1
 mkdir base || exit 1
+mount --bind base instenv/mnt
+
+echo "Installing base system into base ..."
 
 for diskset in $DISKSETS; do
     echo "Installing diskset $diskset..."
-    installpkg --root base --terse install/$diskset/*.t?z || exit 1
+    chroot instenv installpkg --terse --root mnt \
+        var/log/mount/$diskset/*.t?z || exit 1
 done
 
 if [ "x$SUPPORT_PKGS" != x ]; then
     echo "Installing support packages for Linux Live Kit..."
     for pkg in $SUPPORT_PKGS; do
-        installpkg --root base --terse install/*/$pkg-*.t?z || exit 1
+        chroot instenv installpkg --terse --root mnt \
+            var/log/mount/*/$pkg-*.t?z || exit 1
     done
 fi
-chroot base /sbin/ldconfig
+
+chroot base /sbin/ldconfig || exit 1
+)
+result=$?
+
+(cd instenv ; umount var/log/mount dev/pts dev proc mnt) || exit 1
 
 echo Done.
+exit $result

@@ -9,10 +9,6 @@ Some notes:
   -- that is, the directory this README is found in
 * The tools must be run as root. If you're su-ing or sudo-ing from a non-root
   user, you may wish to ensure that /sbin and /usr/sbin are in your path.
-* This process requires Slackware's pkgtools to be installed. If you're
-  running on a Slackware system, obviously this will already be present. If
-  not, you'll need to install them manually. In the future, there may be a
-  script to take care of this for you.
 * This process requires support for overlayfs in order to build the bundles.
 
 Creating a live system involves the following steps:
@@ -39,11 +35,25 @@ patches/packages directory in the Slackware mirrors) and place them in
 updates/, and run the tools/updatepkgs script. This will update packages in
 install/ with packages from updates/.
 
+Finally, you will need to download the Slackware installer ramdisk image and
+place it in the main directory. This is typically named initrd.img, and lives
+in the isolinux/ directory in the slackware mirrors.
+
+You can also run tools/fetchinstall to download the install files (including
+initrd.img), and tools/fetchupdates to download the updates. You may want to
+change the Slackware mirror in config to a suitable mirror. Note that these
+scripts require lftp.
+
 2) Next, run tools/mkbase. This will 'install' a base Slackware system into the
-base/ directory. Actually, what is does is just run 'installpkg' on the
-appropriate packages, into base/. This step requires pkgtools, naturally; it
-is intended to be run on a Slackware system, but installing pkgtools on
-another Linux system may work; this is completely untested.
+base/ directory. This runs in a chroot environment running the Slackware
+installer ramdisk image, and then runs 'installpkg' on the appropriate
+packages, into base/. 
+
+This causes the install scripts to run properly (they'll recognize the
+installer enviroment and act as if they're installing to a new system),
+prevents the install scripts from hosing the running system (I'm not sure how,
+but it did happen at least once), and saves you from having to install
+pkgtools on a non-slackware system.
 
 By default, this will install just diskset a, plus a few packages out of ap
 and l. This is the minimum required to produce a bootable system, plus
@@ -55,11 +65,10 @@ If you want to make any changes to the system before turning it into a
 bootable image, now is the time. Edit the files in base/ as desired before
 continuing onto the next step.
 
-3) Next, run tools/buildlive. This will set up the Linux Live Kit in the base
-directory, mount some system partitions, call the scripts, and move the
-results into the target/ directory. Note that Linux Live Kit is intended to be
-run inside a 'running' Linux install; we emulate this by mounting necessary
-partitions, and chroot-ing into the base and running the script from there.
+3) Next, run tools/buildlive. This will set up the Linux Live Kit in the new
+system and run the scripts, and save the results in target/. Once again, this
+runs in a chroot jail in the new 'live' system; for the above reasons, and
+also because Linux Live Kit is mean to be run on the target live system.
 
 At this point, you will have a live system that can be copied to a USB stick,
 and booted on an EFI-capable system.
@@ -75,6 +84,9 @@ Disksets d, e, and tcl go into the 20-dev bundle
 Disksets x, xap, and xfce go into the 90-x11 bundle
 Diskset kde goes into the 95-kde bundle
 
+If you want the Kernel source, and/or TeX, there's an alternate option in the
+config to enable them.
+
 To create a bundle, run tools/extdiskset with the bundle name as the first
 parameter, and the desired disksets as the remaining parameters. The commands
 to make the above bundles will look something like this:
@@ -88,13 +100,17 @@ This will create a directory in trees/ for each bundle. You can modify the
 content of these file trees before compressing them into a squashfs image if
 you wish.
 
-You can also just run tools/prepbundles, which will setup the default bundles,
+You can also just run tools/prepbundles, which will setup all the bundles
 according to the settings in config.
+
+For reasons previously discussed, this is again run in a chroot jail in the
+target live system.
 
 There is also a 99-patches directory as well; this is a bundle that is loaded
 after everything else. It contains changes particular to SlakResQ, rather than
 modifying the original slackware disksets themselves. You can add your own
-changes to this as well if you so desire.
+changes to this as well if you so desire. You can also create another bundle
+in trees/ with your own additions in the same fashion.
 
 5) Finally, you can run tools/squashbundle to compress each folder in trees/
 into the appropriate bundle file in target/. You can specify which bundles you
@@ -104,7 +120,6 @@ all of them.
 This will add the bundles to the existing live system in target/, so you can
 make changes to a single bundle and re-compress it without having to recreate
 the whole system.
-
 
 ## Directories ##
 

@@ -1,14 +1,21 @@
+# Random backup garbage
 *~
 .*.swp
 
-/base/*
-/diff/*
-/install/*
-/merged/*
-/target/*
-/tmp
-/updates/*
-/trees/*
+# Stuff generated during builds
+/base
+/diff
+/install
+/merged
+/target
+/updates
+initrd.img
+/instenv
+/trees
 !/trees/99-patches
+
+# Something I sometimes use for testing
+/tmp
+
 
 
