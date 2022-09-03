@@ -134,6 +134,8 @@ diff
 install
     Slackware install disksets. You will need to provide these for whatever
     packages you want in your install
+instenv
+    The Slackware installer is extracted and run in here
 live
     Linux Live kit scripts. Feel free to update this if there's a newer
     version. However, make sure to preserve the following files in the live/
