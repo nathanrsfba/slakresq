@@ -121,6 +121,19 @@ This will add the bundles to the existing live system in target/, so you can
 make changes to a single bundle and re-compress it without having to recreate
 the whole system.
 
+## SlakResQ Tweaks ##
+
+The following tweaks are made to the base Slackware install (via the
+99-patches bundle):
+
+* Default runlevel is 4, to activate X; if X isn't detected, it will
+  automatically change to runlevel 3 during boot
+* If root has no password set, the boot scripts will call startx directly to
+  log root in to X. If root has a password, an X display manager is started as
+  is typical.
+* The default xinit session is now a script that attempts to pick an
+  appropriate desktop environment, instead of just assuming KDE is installed.
+
 ## Directories ##
 
 The following subdirectores may be found in this directory:
