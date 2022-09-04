@@ -11,7 +11,7 @@
 /updates
 initrd.img
 /instenv
-/trees
+/trees/*
 !/trees/99-patches
 
 # Something I sometimes use for testing
