@@ -157,6 +157,8 @@ live
         config
         bootfiles/bootlogo.png
         bootfiles/syslinux.cfg
+        initramfs/shutdown
+
 merged
     Mount point for merged overlayfs filesystem
 target
