@@ -16,6 +16,9 @@ buildlive
     but will instead will update any changed files, and leave anything
     else intact.
 
+    If you give this script the -i option, it will rebuild the initramfs,
+    without rebuilding the core module.
+
 extdiskset
     Extracts a set of disksets, and saves the resulting filesystem tree into
     trees/. This uses overlayfs to mount a filesystem overtop base/, this

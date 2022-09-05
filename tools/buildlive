@@ -5,6 +5,17 @@
 . live/config
 . config
 
+while getopts "i" opt; do
+    if [ $opt = i ]; then
+        # The LLK build script recognizes this if set
+        export SKIPCOREMOD=1
+    elif [ $opt = '?' ]; then
+        echo "Usage: $0 [-i]"
+        echo "  -i: Only build the initramfs"
+        exit 1
+    fi
+done
+
 if [ `whoami` != root ]; then
     echo "Error: We are not root"
     exit 1
