@@ -4,22 +4,43 @@
 # Old files will be retained with an extension of .old. To clean these out, do
 # rm install/*/*.old
 
-while getopts "tqv?" opt; do
+# Path to disksets to upgrade
+INSTALLPATH='./install'
+# Path to update packages
+UPDATEPATH='./updates'
+
+while getopts "tqvi:u:?" opt; do
     if [ $opt = 't' ]; then
         TEST=1
     elif [ $opt = 'v' ]; then
         VERBOSE=1
     elif [ $opt = 'q' ]; then
         QUIET=1
+    elif [ $opt = 'u' ]; then
+        UPDATEPATH="$OPTARG"
+    elif [ $opt = 'i' ]; then
+        INSTALLPATH="$OPTARG"
     elif [ $opt = '?' ]; then
-        echo Usage: $0 [-t] [-v]
+        echo "Usage: $0 [-t] [-v] [-u UPDATEPATH] [-i INSTALLPATH]"
         echo ''
         echo "-t: Test: Display what would be done without making changes"
         echo "-v: Verbose: Display more information"
         echo "-q: Quiet: Update packages without output"
+        echo "-u: Specify the path to update packages, default $UPDATEPATH"
+        echo "-i: Specify the path to disksets to update, default $INSTALLPATH"
         exit
     fi
 done
+
+if [ ! -d $INSTALLPATH ]; then
+    echo "Cannot access '$INSTALLPATH'"
+    exit 1
+fi
+
+if [ ! -d $UPDATEPATH ]; then
+    echo "Cannot access '$UPDATEPATH'"
+    exit 1
+fi
 
 # Return a package name that has been stripped of the dirname portion
 # and any of the valid extensions (only):
@@ -35,7 +56,7 @@ package_name() {
 
 # Try to find an old package in install/ with the given name
 findpkg() {
-    for pkg in install/*/$1-*.t?z; do
+    for pkg in "$INSTALLPATH"/*/$1-*.t?z; do
         pkgname=`package_name $pkg`
         if [ $pkgname = $1 ]; then
             echo $pkg
@@ -45,7 +66,7 @@ findpkg() {
     return 1
 }
 
-for pkg in updates/*.t?z; do
+for pkg in "$UPDATEPATH"/*.t?z; do
     pkgname="`package_name $pkg`"
     old="`findpkg $pkgname`"
     if [ x$old != x ]; then
@@ -66,12 +87,12 @@ for pkg in updates/*.t?z; do
             if [ ! $TEST ]; then
                 oldpath="`dirname $old`"
                 mv "$old" "$old.old" || exit 1
-                mv "$old.asc" "$old.asc.old" || exit 1
-                mv "$oldpath/$oldbase.txt" "$oldpath/$oldbase.txt.old" || exit 1
+                mv "$old.asc" "$old.asc.old" || echo "Warning: $old has no fingerprint"
+                mv "$oldpath/$oldbase.txt" "$oldpath/$oldbase.txt.old" || echo "Warning: $old has no text file"
                 newpath="`dirname $pkg`"
                 cp "$pkg" "$oldpath" || exit 1
-                cp "$pkg.asc" "$oldpath" || exit 1
-                cp "$newpath/$newbase.txt" $oldpath || exit 1
+                cp "$pkg.asc" "$oldpath" || echo "Warning: $pkg has no fingerprint"
+                cp "$newpath/$newbase.txt" $oldpath || echo "Warning: $pkg has no text file"
             fi
         fi
     else
