@@ -1,0 +1,3 @@
+[submodule "live"]
+	path = live
+	url = https://github.com/Tomas-M/linux-live.git
