@@ -1,3 +1,4 @@
 [submodule "live"]
 	path = live
-	url = https://github.com/Tomas-M/linux-live.git
+	url = /home/nathanr/linux-live
+	branch = slakresq
