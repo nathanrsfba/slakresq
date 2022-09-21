@@ -6,8 +6,6 @@ disksets="$CORE_DISKSETS ${BUNDLE[@]}"
 
 mkdir -p install || exit 1
 
-echo $disksets
-
 for diskset in $disksets; do
     if [ ! -d install/$diskset ]; then
         echo "Downloading diskset $diskset..."
