@@ -10,7 +10,6 @@
 . config
 
 do_lftp() {
-    echo Downloading $2 with lftp
     if [ $1 = 'mirror' ]; then
         lftp -c mirror -ev $2 $3 || exit 1
     elif [ $1 = 'get' ]; then
@@ -19,7 +18,6 @@ do_lftp() {
 }
 
 do_ncftp() {
-    echo Downloading $2 with ncftp
     if [ $1 = 'mirror' ]; then
         mkdir -p $3
         (cd $3; ncftpget -R -T $2) || exit 1
