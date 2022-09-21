@@ -22,7 +22,7 @@ do_ncftp() {
     echo Downloading $2 with ncftp
     if [ $1 = 'mirror' ]; then
         mkdir -p $3
-        (cd $3; ncftpget -R $2) || exit 1
+        (cd $3; ncftpget -R -T $2) || exit 1
     elif [ $1 = 'get' ]; then
         ncftpget $2 || exit 1
     fi
