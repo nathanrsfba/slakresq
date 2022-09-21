@@ -22,7 +22,7 @@
 #   6 = reboot
 
 # Default runlevel. (Do not set to 0 or 6)
-id:4:initdefault:
+id:3:initdefault:
 
 # System initialization (runs when system boots).
 si:S:sysinit:/etc/rc.d/rc.S
