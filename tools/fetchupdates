@@ -9,4 +9,4 @@ mirrorbase="`dirname $MIRROR/$VERSION`"
 mkdir -p updates || exit 1
 
 echo "Checking for updates"
-lftp -c mirror -ev "$mirrorbase/patches/packages" updates || exit 1
+tools/ftpget mirror "$mirrorbase/patches/packages" updates || exit 1
