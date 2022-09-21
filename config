@@ -34,16 +34,16 @@ INSTALLUPDATES=1
 
 # Slackware mirror to download files from. Should point to the directory with
 # disksets
-MIRROR="ftp://ftp.slackware.com/pub/slackware/slackware-15.0/"
+MIRROR="ftp://ftp.slackware.com/pub/slackware/slackware64-15.0/"
 
 # Instead of connecting to the main Slackware server, you might want to connect
 # to a random mirror. Here's a few US mirrors that seem to work, as of
 # September 2022
 # 
-# MIRROR="ftp://mirror.cs.princeton.edu/pub/mirrors/slackware/slackware-15.0/"
-# MIRROR="ftp://mirror.slackbuilds.org/pub/slackware/slackware-15.0/"
-# MIRROR="ftp://mirrors.syringanetworks.net/slackware/slackware-15.0/"
-# MIRROR="ftp://mirrors.xmission.com/slackware/slackware-15.0/"
-# MIRROR="ftp://plug-mirror.rcac.purdue.edu/slackware/slackware-15.0/"
-# MIRROR="ftp://slackware.cs.utah.edu/slackware/slackware-15.0/"
-# MIRROR="ftp://slackware.mirrors.tds.net/slackware-15.0/"
+# MIRROR="ftp://mirror.cs.princeton.edu/pub/mirrors/slackware/slackware64-15.0/"
+# MIRROR="ftp://mirror.slackbuilds.org/pub/slackware/slackware64-15.0/"
+# MIRROR="ftp://mirrors.syringanetworks.net/slackware/slackware64-15.0/"
+# MIRROR="ftp://mirrors.xmission.com/slackware/slackware64-15.0/"
+# MIRROR="ftp://plug-mirror.rcac.purdue.edu/slackware/slackware64-15.0/"
+# MIRROR="ftp://slackware.cs.utah.edu/slackware/slackware64-15.0/"
+# MIRROR="ftp://slackware.mirrors.tds.net/slackware64-15.0/"
