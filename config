@@ -32,18 +32,27 @@ FETCHUPDATES=1
 # Install updates before building
 INSTALLUPDATES=1
 
-# Slackware mirror to download files from. Should point to the directory with
-# disksets
-MIRROR="ftp://ftp.slackware.com/pub/slackware/slackware64-15.0/"
+# Slackware mirror to download files from. Should point to the main slackware
+# directory with versions
+
+MIRROR="ftp://ftp.slackware.com/pub/slackware/"
 
 # Instead of connecting to the main Slackware server, you might want to connect
 # to a random mirror. Here's a few US mirrors that seem to work, as of
 # September 2022
 # 
-# MIRROR="ftp://mirror.cs.princeton.edu/pub/mirrors/slackware/slackware64-15.0/"
-# MIRROR="ftp://mirror.slackbuilds.org/pub/slackware/slackware64-15.0/"
-# MIRROR="ftp://mirrors.syringanetworks.net/slackware/slackware64-15.0/"
-# MIRROR="ftp://mirrors.xmission.com/slackware/slackware64-15.0/"
-# MIRROR="ftp://plug-mirror.rcac.purdue.edu/slackware/slackware64-15.0/"
-# MIRROR="ftp://slackware.cs.utah.edu/slackware/slackware64-15.0/"
-# MIRROR="ftp://slackware.mirrors.tds.net/slackware64-15.0/"
+# MIRROR="ftp://mirror.cs.princeton.edu/pub/mirrors/slackware/"
+# MIRROR="ftp://mirror.slackbuilds.org/pub/slackware/"
+# MIRROR="ftp://mirrors.syringanetworks.net/slackware/"
+# MIRROR="ftp://mirrors.xmission.com/slackware/"
+# MIRROR="ftp://plug-mirror.rcac.purdue.edu/slackware/"
+# MIRROR="ftp://slackware.cs.utah.edu/slackware/"
+# MIRROR="ftp://slackware.mirrors.tds.net/"
+
+# For testing purposes.
+# MIRROR="ftp://localhost/slackware/"
+
+# Path to slackware disksets within mirror. This should point to the diskset
+# directory within the mirror. Update this with the version you want to
+# install.
+VERSION="slackware64-15.0/slackware64"
