@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Download a directory or file from an FTP site. Uses ncftp or lftp depending
+# on the $FTP variable.
+
+# $1 should be 'mirror' to get a directory, or 'get' for a single file
+# $2 is the URL of the file/directory
+# $3 is the destination directory for mirror
+
+. config
+
+do_lftp() {
+    echo Downloading $2 with lftp
+    if [ $1 = 'mirror' ]; then
+        lftp -c mirror -ev $2 $3 || exit 1
+    elif [ $1 = 'get' ]; then
+        lftp -c get $2 || exit 1
+    fi
+}
+
+do_ncftp() {
+    echo Downloading $2 with ncftp
+    if [ $1 = 'mirror' ]; then
+        mkdir -p $3
+        (cd $3; ncftpget -R $2) || exit 1
+    elif [ $1 = 'get' ]; then
+        ncftpget $2 || exit 1
+    fi
+}
+
+if [ x$FTP = x ]; then 
+    FTP=lftp
+fi
+
+do_$FTP $*
+

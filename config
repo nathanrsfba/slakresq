@@ -32,6 +32,10 @@ FETCHUPDATES=1
 # Install updates before building
 INSTALLUPDATES=1
 
+# FTP app to use. If for some reason lftp doesn't like your setup, try ncftp
+FTP=lftp
+#FTP=ncftp
+
 # Slackware mirror to download files from. Should point to the main slackware
 # directory with versions
 

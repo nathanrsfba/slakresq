@@ -4,7 +4,7 @@
 
 . config || exit 1
 
-mirrorbase="`dirname $MIRROR`"
+mirrorbase="`dirname $MIRROR/$VERSION`"
 
 mkdir -p updates || exit 1
 

@@ -6,15 +6,17 @@ disksets="$CORE_DISKSETS ${BUNDLE[@]}"
 
 mkdir -p install || exit 1
 
+path="$MIRROR/$VERSION"
+
 for diskset in $disksets; do
     if [ ! -d install/$diskset ]; then
         echo "Downloading diskset $diskset..."
-        lftp -c mirror -ev "$MIRROR/$diskset" install/$diskset || exit 1
+        tools/ftpget mirror "$path/$diskset" install/$diskset || exit 1
     fi
 done
 
 if [ ! -e initrd.img ]; then
 	echo "Downloading Slackware installer image..."
-	mirrorbase="`dirname $MIRROR`"
-	lftp -c get "$mirrorbase/isolinux/initrd.img" || exit 1
+	mirrorbase="`dirname $path`"
+	tools/ftpget get "$mirrorbase/isolinux/initrd.img" || exit 1
 fi
