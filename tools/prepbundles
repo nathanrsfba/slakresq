@@ -4,7 +4,7 @@
 
 . config || exit 1
 
-for bundle in $BUNDLES; do
+for bundle in ${!BUNDLE[@]}; do
     disksets="${BUNDLE[$bundle]}"
     if [ "x$disksets" != x ]; then
 	echo "Extracting files for bundle $bundle..."

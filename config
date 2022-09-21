@@ -5,25 +5,23 @@ CORE_DISKSETS="a"
 # Use this if your core diskset doesn't include ap and l
 SUPPORT_PKGS="squashfs-tools lzo lz4 cdrtools"
 
-# What optional bundles to build
-BUNDLES="10-console 20-dev 90-x11 95-kde 99-patches"
-# If you want to include the kernel source and TeX:
-# BUNDLES="10-console 20-dev 30-ksrc 30-tex 90-x11 95-kde 99-patches"
+# Declare an associative array for what follows...
+declare -A BUNDLE 
 
-# The disksets to go in each bundle. If a bundle doesn't specify any disksets,
-# no disksets will be installed for that bundle. In this event, it is assumed
-# the files for the bundle will be populated in trees/ beforehand. (This is
-# true of 99-patches)
-
-BUNDLE[10-net]="ap f l n y"
+# The following declare the bundles to create, and what disksets go in them.
+BUNDLE[10-console]="ap f l n y"
 BUNDLE[20-dev]="d e tcl"
-BUNDLE[30-ksrc]="k"
-BUNDLE[30-tex]="t"
 BUNDLE[90-x11]="x xap xfce"
 BUNDLE[95-kde]="kde"
 
-# Install Slackware's pkgtools on your system if it's not present
-INSTALLPKGTOOLS=1
+# If a bundle doesn't specify any disksets, no disksets will be extracted for
+# that bundle. In this event, it is assumed the files for the bundle will be
+# populated in trees/ beforehand.
+BUNDLE[99-patches]=""
+
+# If you want to include the kernel source and/or TeX, uncomment the following:
+# BUNDLE[30-ksrc]="k"
+# BUNDLE[30-tex]="t"
 
 # Automatically download the install disksets
 FETCHINSTALL=1
@@ -49,7 +47,3 @@ MIRROR="ftp://ftp.slackware.com/pub/slackware/slackware-15.0/"
 # MIRROR="ftp://plug-mirror.rcac.purdue.edu/slackware/slackware-15.0/"
 # MIRROR="ftp://slackware.cs.utah.edu/slackware/slackware-15.0/"
 # MIRROR="ftp://slackware.mirrors.tds.net/slackware-15.0/"
-
-# This guy is just for testing
-MIRROR="ftp://192.168.1.170/slackware/slackware64-15.0/slackware64"
-

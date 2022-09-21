@@ -2,13 +2,11 @@
 
 . config || exit 1
 
-disksets="$CORE_DISKSETS"
-
-for bundle in $BUNDLES; do
-    disksets="$disksets ${BUNDLE[$bundle]}"
-done
+disksets="$CORE_DISKSETS ${BUNDLE[@]}"
 
 mkdir -p install || exit 1
+
+echo $disksets
 
 for diskset in $disksets; do
     if [ ! -d install/$diskset ]; then
