@@ -1,0 +1,178 @@
+#!/bin/bash
+
+# This file implements the functionality related to automatically setting
+# root's password, and creating a new user
+
+# --------------------------------
+
+# Check if the root account has a password. If not, set a random one, create a
+# user, and create some welcome messages.
+init() {
+	if head -1 /etc/shadow | grep ^root:: -q; then
+		useradd -m slakresq
+		pass=`randpw`
+		chpasswd <<-ENDL
+			root:$pass
+			slakresq:$pass
+		ENDL
+
+		touch /root/WELCOME.txt
+		chmod go-twx /root/WELCOME.txt
+		rootmsg > /root/WELCOME.txt 
+
+		touch /home/slakresq/WELCOME.txt
+		chown slakresq.users /home/slakresq/WELCOME.txt
+		chmod go-rwx /home/slakresq/WELCOME.txt
+		usermsg > /home/slakresq/WELCOME.txt
+	fi
+}
+
+# Initialize the default passwords if necessary. Then, if the default passwords
+# are set, display the welcome message.
+startup() {
+
+	init
+
+	if isdefaultpw; then
+		echo ""
+		cat /root/WELCOME.txt
+		echo ""
+	fi
+}
+
+# If the default passwords are still set, log in slakresq user directly; else,
+# disable rc.4.local and kick control back to rc.4
+startx() {
+	if isdefaultpw; then
+		# This is deep voodoo
+		exec setsid -w sh -c 'exec su -l slakresq -c startx <> /dev/tty7 >&0 2>&1'
+	else
+		chmod a-x /etc/rc.d/rc.4.local
+		exec /etc/rc.d/rc.4
+	fi
+}
+
+# If the default passwords are still set, display the welcome message upon
+# X startup
+xwelcome() {
+	if isdefaultpw; then
+		if [ ! -e ~/.Xdefaults ]; then
+			xdefaults > ~/.Xdefaults
+		fi
+		xmessage -center -buttons OK -title Welcome -file ~/WELCOME.txt &
+	fi
+}
+
+# See if user's welcome message is still present, and is newer than the
+# password database (indicating that passwords have not been changed yet)
+
+isdefaultpw() {
+	if [ `whoami` = root ]; then
+		welcome=/root/WELCOME.txt
+	else
+		welcome=~/WELCOME.txt
+	fi
+
+	if [ -r $welcome -a $welcome -nt /etc/shadow ]; then
+		return 0
+	fi
+
+	return 1
+}
+
+# Generate a random password
+
+randpw() {
+	< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c6
+}
+
+# Generate root welcome message
+rootmsg () {
+	cat <<-ENDL
+	Hello and welcome to SlakResQ.
+
+	In the name of security, a random root password has been set, and a regular
+	user has been added, with the same password:
+
+	Username: slakresq
+	Password: $pass
+
+	This message will no longer appear once either password has been changed, or
+	another user added. However, this message will be saved to /root/WELCOME.txt
+	for reference.
+	ENDL
+
+}
+
+# Generate user welcome message
+usermsg () {
+	cat <<-ENDL
+	Hello and welcome to SlakResQ.
+
+	In the name of security, you have been logged in as a regular user, with the
+	following login:
+
+	Username: slakresq
+	Password: $pass
+
+	The root account has also been given the same password.
+
+	Once either password has been changed (or a new user added), this message will
+	no longer appear, and you will be promped to log into X at startup.
+
+	This message will be saved to ~/WELCOME.txt for reference, only readable by
+	you.
+	ENDL
+}
+
+# Create an .Xdefaults to make xmessage look nicer
+xdefaults() {
+	cat <<-ENDL
+	Xmessage*font:                          -xos4-terminus-medium-*-*-*-12-*-*-*-*-*-iso8859-2
+
+	Xmessage*geometry:                         +200+200
+
+	Xmessage*background:                    gray85
+	Xmessage*foreground:                    gray15
+
+	Xmessage*Scrollbar.thumb:               vlines2
+	Xmessage*Scrollbar.width:               12
+	Xmessage*Scrollbar.foreground:          rgb:a/5/5
+	Xmessage*Scrollbar.borderWidth:         0
+	Xmessage*Scrollbar.displayList:\
+	foreground      gray90;\
+	lines           1,-1,-1,-1,-1,1;\
+	foreground      gray60;\
+	lines           -1,0,0,0,0,-1
+
+	Xmessage*Text.?.cursorColor:            rgb:d/5/5
+	Xmessage*Text.borderColor:              gray80
+	Xmessage*Text*background:               gray96
+	Xmessage*Text*Scrollbar.background:     gray80
+	Xmessage*Text.displayList:\
+	foreground      gray90;\
+	lines           1,-1,-1,-1,-1,1;\
+	foreground      gray60;\
+	lines           -1,0,0,0,0,-1
+
+	Xmessage*Command.highlightThickness:    2
+	Xmessage*Command.internalWidth:         5
+	Xmessage*Command.internalHeight:        3
+	Xmessage*Command.borderColor:           gray40
+	Xmessage*Command.shapeStyle:            Rectangle
+	Xmessage*Command.background:            gray80
+	Xmessage*Command.displayList:\
+	foreground      gray60;\
+	lines           1,-1,-1,-1,-1,1;\
+	foreground      gray90;\
+	lines           -1,0,0,0,0,-1
+
+	Xmessage*Form.displayList:\
+	foreground      gray60;\
+	lines           1,-1,-1,-1,-1,1;\
+	foreground      gray90;\
+	lines           -1,0,0,0,0,-1
+	ENDL
+}
+
+$1
