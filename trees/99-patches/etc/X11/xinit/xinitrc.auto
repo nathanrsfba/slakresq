@@ -3,7 +3,7 @@
 # Try to automatically select a desktop environment, depending on what's installed
 
 # Sessions that will be tried first, in this order
-PREFERRED="gnome kde xfce"
+PREFERRED="gnome kde cinnamon-session xfce"
 
 # Sessions that will be tried if there are no other options
 FALLBACK="wmaker blackbox fluxbox fvwm2 mwm twm"
