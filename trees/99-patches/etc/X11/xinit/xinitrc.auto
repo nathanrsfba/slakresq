@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Display welcome message if appropriate
+/bin/autopw xwelcome
+
 # Try to start the following desktop environments, in this order
 for env in gnome kde xfce wmaker fvwm2 twm; do
 	if [ -x /etc/X11/xinit/xinitrc.$env ]; then
