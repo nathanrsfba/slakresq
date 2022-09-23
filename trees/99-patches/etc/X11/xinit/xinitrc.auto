@@ -1,14 +1,47 @@
 #!/bin/bash
 
+# Try to automatically select a desktop environment, depending on what's installed
+
+# Sessions that will be tried first, in this order
+PREFERRED="gnome kde xfce"
+
+# Sessions that will be tried if there are no other options
+FALLBACK="wmaker blackbox fluxbox fvwm2 mwm twm"
+
+# Sessions that will be ignored even if they exist
+#IGNORE="mwm"
+
 # Display welcome message if appropriate
 /bin/autopw xwelcome
 
 # Try to start the following desktop environments, in this order
-for env in gnome kde xfce wmaker fvwm2 twm; do
+for env in $PREFERRED; do
 	if [ -x /etc/X11/xinit/xinitrc.$env ]; then
 		exec /etc/X11/xinit/xinitrc.$env
 	fi
 done
 
+# See if there are any that aren't in either the preferred or fallback list
+# If so, try the most recently installed
+
+filter=`echo $PREFERRED $FALLBACK $IGNORE auto`
+filter="${filter// /|}"
+sessions=`ls -t /etc/X11/xinit/xinitrc.* | grep -vE $filter`
+
+for env in $sessions; do
+	if [ -x $env ]; then
+		exec $env
+	fi
+done
+
+# Finally, try the fallbacks, in order
+for env in $FALLBACK; do
+	if [ -x /etc/X11/xinit/xinitrc.$env ]; then
+		exec /etc/X11/xinit/xinitrc.$env
+	fi
+done
+
+
+
 echo "Couldn't find any desktop environment installed!"
-return 1
+exit 1
