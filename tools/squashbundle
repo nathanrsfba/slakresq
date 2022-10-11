@@ -4,6 +4,7 @@
 
 . config
 . live/config
+. live/livekitlib
 
 bundles="$*"
 if [ x$bundles = x ]; then
