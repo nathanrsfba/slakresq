@@ -3,14 +3,23 @@
 . live/config
 . config
 
-if [ x$2 = x ]; then
-    echo "Usage: $0 bundle_name diskset [diskset...]"
+if [ x$1 = x ]; then
+    echo "Usage: $0 bundle_name [diskset...]"
     exit
 fi
 
 bundle=$1
 shift
 disksets="$*"
+
+if [ "$disksets" = "" ]; then
+    disksets="${BUNDLE[$bundle]}"
+fi
+
+if [ "$disksets" = "" ]; then
+    echo No disksets specified
+    exit 1
+fi
 
 echo "Setting up install environment..."
 
