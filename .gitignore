@@ -17,5 +17,7 @@ initrd.img
 # Something I sometimes use for testing
 /tmp
 
+# Needed since my work directory is a mounted filesystem image
+lost+found
 
 
