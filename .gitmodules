@@ -1,4 +1,4 @@
 [submodule "live"]
 	path = live
-	url = /home/nathanr/linux-live
+	url = https://github.com/nathanrsfba/linux-live.git
 	branch = slakresq
