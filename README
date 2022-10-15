@@ -1,8 +1,10 @@
 This is SlakResQ: A set of scripts for creating a (more or less) full
-Slackware bootable USB stick using the Linux Live Kit.
+Slackware bootable USB stick using a modified version of Tomas Matejicek's
+Linux Live Kit.
 
 Currently, this only supports booting from a USB stick using an EFI-capable
-bios. Bootable CD and syslinux-style booting may be supported in the future.
+bios. Using syslinux/extlinux on USB may work but is mostly untested. Bootable
+CD may be supported in the future.
 
 Some notes:
 * All the tools in this kit should be run out of the 'main' SlakResQ directory
@@ -10,6 +12,11 @@ Some notes:
 * The tools must be run as root. If you're su-ing or sudo-ing from a non-root
   user, you may wish to ensure that /sbin and /usr/sbin are in your path.
 * This process requires support for overlayfs in order to build the bundles.
+* If you clone this from github, make sure to also clone the live directory,
+  which is a submodule (I.E. a separate git repository). You can do this by
+  specifying '--recurse-submodules' when you clone it, or you can do 'git
+  submodule --init live' after the fact. If you downloaded a tarball,
+  everything should be present already.
 
 Creating a live system involves the following steps:
 
@@ -42,7 +49,7 @@ in the isolinux/ directory in the slackware mirrors.
 You can also run tools/fetchinstall to download the install files (including
 initrd.img), and tools/fetchupdates to download the updates. You may want to
 change the Slackware mirror in config to a suitable mirror. Note that these
-scripts require lftp.
+scripts require either lftp or ncftp -- enable the appropriate one in config.
 
 2) Next, run tools/mkbase. This will 'install' a base Slackware system into the
 base/ directory. This runs in a chroot environment running the Slackware
@@ -51,9 +58,8 @@ packages, into base/.
 
 This causes the install scripts to run properly (they'll recognize the
 installer enviroment and act as if they're installing to a new system),
-prevents the install scripts from hosing the running system (I'm not sure how,
-but it did happen at least once), and saves you from having to install
-pkgtools on a non-slackware system.
+gives some protection to the running system, and saves you from having to
+install pkgtools on a non-slackware system.
 
 By default, this will install just diskset a, plus a few packages out of ap
 and l. This is the minimum required to produce a bootable system, plus
@@ -62,7 +68,7 @@ which extra packages are installed with the SUPPORT_PKGS variable. If your
 core includes both ap and l, you can comment this line out.
 
 If you want to make any changes to the system before turning it into a
-bootable image, now is the time. Edit the files in base/ as desired before
+bootable image, you may do so now. Edit the files in base/ as desired before
 continuing onto the next step.
 
 3) Next, run tools/buildlive. This will set up the Linux Live Kit in the new
@@ -84,27 +90,24 @@ Disksets d, e, and tcl go into the 20-dev bundle
 Disksets x, xap, and xfce go into the 90-x11 bundle
 Diskset kde goes into the 95-kde bundle
 
-If you want the Kernel source, and/or TeX, there's an alternate option in the
-config to enable them.
+If you want the Kernel source, and/or TeX, there's options in the config to
+enable them.
 
-To create a bundle, run tools/extdiskset with the bundle name as the first
-parameter, and the desired disksets as the remaining parameters. The commands
-to make the above bundles will look something like this:
+To create a bundle, first you need to extract the disksets that will go into
+it. You can either run tools/prepbundles, which will set up all the bundles
+defined in config, or you can do them individually by hand.
 
-tools/extdiskset 10-console ap f n l y
-tools/extdiskset 20-dev d e tcl
-tools/extdiskset 90-x11 x xap xfce
-tools/extdiskset 95-kde kde
+To set them up individually, call tools/extdiskset for each bundle you want to
+create. The commands to make the above bundles will look something like this:
+
+    tools/extdiskset 10-console ap f n l y
+    tools/extdiskset 20-dev d e tcl
+    tools/extdiskset 90-x11 x xap xfce
+    tools/extdiskset 95-kde kde
 
 This will create a directory in trees/ for each bundle. You can modify the
 content of these file trees before compressing them into a squashfs image if
 you wish.
-
-You can also just run tools/prepbundles, which will setup all the bundles
-according to the settings in config.
-
-For reasons previously discussed, this is again run in a chroot jail in the
-target live system.
 
 There is also a 99-patches directory as well; this is a bundle that is loaded
 after everything else. It contains changes particular to SlakResQ, rather than
@@ -135,6 +138,8 @@ The following tweaks are made to the base Slackware install (via the
   into X as the new user and display a similar message.
 * The default xinit session is now a script that attempts to pick an
   appropriate desktop environment based on what's installed.
+* The shutdown script passes control to the Linux Live Kit shutdown script to
+  ensure everything gets unmounted properly
 
 ## Directories ##
 
@@ -145,34 +150,33 @@ base
 diff
     Place to save changes from the core bundle to make subsequent bundles.
     diff/data contains filesystem changes, diff/work is temporary directory
-    for overlayfs
+    for overlayfs. This can be safely deleted after bundle creation is
+    complete.
 install
     Slackware install disksets. You will need to provide these for whatever
     packages you want in your install
 instenv
-    The Slackware installer is extracted and run in here
+    The Slackware installer is extracted and run in here. This can be safely
+    deleted once the base/ directory is created.
 live
-    Linux Live kit scripts. Feel free to update this if there's a newer
-    version. However, make sure to preserve the following files in the live/
-    folder, as they have been edited for SlakResQ:
-
-        config
-        bootfiles/bootlogo.png
-        bootfiles/syslinux.cfg
-        initramfs/shutdown
-
+    Linux Live kit scripts. This is a custom version, so take care if you try
+    to upgrade them; merge them in using git and don't just untar a new
+    version into here. Your mileage may vary.
 merged
-    Mount point for merged overlayfs filesystem
+    Mount point for merged overlayfs filesystem. This can be safely be deleted
+    after bundle creation.
 target
-    File tree for final image
+    File tree for final image. This is what will be copied to a USB stick, or
+    wherever
 tools
     Scripts used to create the image
 trees
-    Root filesystem updates for each bundle
+    Content of each bundle
 updates
     Slackware package updates. The tools/updatepkgs script will replace
     packages in the install/ folder with newer versions out of here.
 
 
+-- Nathan Roberts <nathanr@tardislabs.com>
 
 
