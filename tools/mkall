@@ -73,7 +73,9 @@ for bundle in ${!BUNDLE[@]}; do
         done
     fi
     if [ $update ]; then
-        tools/extdiskset $bundle || exit 1
+        if [ "${BUNDLE[$bundle]}" != "" ]; then
+            tools/extdiskset $bundle || exit 1
+        fi
         tools/squashbundle $bundle || exit 1
     fi
 done
