@@ -52,10 +52,10 @@ else
 fi
 
 if [ "$UPDATE_BASE" ]; then
-    tools/mkbase
-    tools/buildlive
+    tools/mkbase || exit 1
+    tools/buildlive || exit 1
 elif [ $UPDATE_BOOT ]; then
-    tools/buildlive -i
+    tools/buildlive -i || exit 1
 fi
 
 # See if any bundles need updating
@@ -73,8 +73,8 @@ for bundle in ${!BUNDLE[@]}; do
         done
     fi
     if [ $update ]; then
-        tools/extdiskset $bundle
-        tools/squashbundle $bundle
+        tools/extdiskset $bundle || exit 1
+        tools/squashbundle $bundle || exit 1
     fi
 done
 
