@@ -49,6 +49,9 @@ else
     if [ "`find live/initramfs -newer $ramfs -print -quit`" != "" ]; then
         UPDATE_BOOT=1
     fi
+    if [ "`find live/bootfiles -newer $ramfs -print -quit`" != "" ]; then
+        UPDATE_BOOT=1
+    fi
 fi
 
 if [ "$UPDATE_BASE" ]; then
