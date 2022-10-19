@@ -1,0 +1,54 @@
+#!/bin/bash
+
+while getopts 'iutTma?' arg; do
+    case $arg in
+        i) INSTALL=1;;
+        u) UPDATES=1;;
+        t) TARGET=1;;
+        T) TREES=1;;
+        m) TEMP=1;;
+        a)
+            INSTALL=1
+            UPDATES=1
+            TARGET=1
+            TREES=1
+            TEMP=1
+            ;;
+
+        '?')
+            echo "Usage: `basename $0` [-iutTma]"
+            echo ''
+            echo '-i    Delete install disksets'
+            echo '-u    Delete updates folder'
+            echo '-t    Delete target folder'
+            echo '-T    Delete diskset trees'
+            echo '-m    Delete temporary folderse'
+            echo '-a    Delete all of the above'
+            exit
+            ;;
+    esac
+done
+
+if [ ! "$1" ]; then
+    exec $0 -?
+fi
+
+if [ $INSTALL ]; then
+    echo rm -rf install
+fi
+
+if [ $UPDATES ]; then
+    echo rm -rf updates
+fi
+
+if [ $TARGET ]; then
+    echo rm -rf target
+fi
+
+if [ $TEMP ]; then
+    echo rm -rf diff instenv merged
+fi
+
+if [ $TREES ]; then
+    echo rm -rf `find trees/ -mindepth 1 -maxdepth 1 \! -name 99-patches`
+fi

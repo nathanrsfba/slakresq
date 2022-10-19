@@ -23,6 +23,10 @@ fi
  
 echo "Building the live boot image..."
 
+(
+# Exit the subshell if interrupted, so cleanup can occur
+trap "exit 1" INT TERM HUP
+
 # Make the Linux Live script available in the base filesystem
 mkdir -p base/live || exit 1
 mount --bind live base/live || exit 1
@@ -32,7 +36,6 @@ mount -t devtmpfs devtmpfs base/dev || exit 1
 mount -t devpts devpts base/dev/pts || exit 1
 mount -t proc proc base/proc || exit 1
 
-(
 # Cleanup any old builds
 rm -rf base/tmp/$LIVEKITNAME-data-*
 
@@ -47,7 +50,10 @@ cp -a base/tmp/$LIVEKITNAME-data-*/* target || exit 1
 rm -rf target/EFI
 mv target/$LIVEKITNAME/boot/EFI target || exit 1
 )
+result=$?
 
 # Cleanup
-umount base/dev/pts base/dev base/proc base/live
+umount base/dev/pts base/dev base/proc base/live || exit 1
+
+exit $result
 
