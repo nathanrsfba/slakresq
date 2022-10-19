@@ -36,6 +36,9 @@ if [ x$1 != x ]; then
 fi
 
 (
+# Exit the subshell if interrupted, so cleanup can occur
+trap "exit 1" INT TERM HUP
+
 # Start from scratch
 echo "Cleaning up old files..."
 rm -rf base || exit 1
@@ -64,5 +67,4 @@ result=$?
 
 (cd instenv ; umount var/log/mount dev/pts dev proc mnt) || exit 1
 
-echo Done.
 exit $result
