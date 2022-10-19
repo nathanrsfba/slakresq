@@ -51,7 +51,10 @@ finddupes
 
 mkall
     Goes through and runs all the scripts in the proper order to make a new
-    SlakResQ build
+    SlakResQ build. This will attempt to run incrementally. If a previous
+    build was interrupted, it will continue where it left off. If things were
+    added or changed, it will only rebuild the changes. This process is not
+    foolproof however.
 
 prepbundles
     Runs extdiskset for all bundles defined in config
