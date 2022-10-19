@@ -28,6 +28,8 @@ rm -rf diff/work || exit 1
 mkdir -p diff/data diff/work merged || exit 1
 
 (
+# Exit the subshell if interrupted, so cleanup can occur
+trap "exit 1" INT TERM HUP
 
 # Mount the overlay
 mount -t overlay -o lowerdir=base,upperdir=diff/data,workdir=diff/work overlay merged || exit 1
@@ -45,12 +47,15 @@ for disk in $disksets; do
     chroot merged /sbin/installpkg --terse /mnt/hd/$disk/*.t?z || exit 1
 done
 
+rm -rf trees/$bundle || exit 1
 mv diff/data trees/$bundle
 )
+result=$?
 
 echo "Cleaning up..."
 
 # Unmount everything
-umount merged/dev/pts merged/dev merged/proc merged/mnt/hd merged
+umount merged/dev/pts merged/dev merged/proc merged/mnt/hd merged || exit 1
 
+exit $result
 
