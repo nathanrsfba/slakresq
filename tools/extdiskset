@@ -1,12 +1,16 @@
 #!/bin/bash
 
-. live/config
-. config
+. live/config || exit 1
+. config || exit 1
+. tools/srqlib || exit 1
+
 
 if [ x$1 = x ]; then
     echo "Usage: $0 bundle_name [diskset...]"
     exit
 fi
+
+checkroot || exit 1
 
 bundle=$1
 shift

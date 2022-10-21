@@ -2,8 +2,9 @@
 
 # Prepare to build the Linux Live base image
 
-. live/config
-. config
+. live/config || exit 1
+. config || exit 1
+. tools/srqlib || exit 1
 
 while getopts "i" opt; do
     if [ $opt = i ]; then
@@ -16,11 +17,8 @@ while getopts "i" opt; do
     fi
 done
 
-if [ `whoami` != root ]; then
-    echo "Error: We are not root"
-    exit 1
-fi
- 
+checkroot || exit 1
+
 echo "Building the live boot image..."
 
 (

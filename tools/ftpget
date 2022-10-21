@@ -7,7 +7,7 @@
 # $2 is the URL of the file/directory
 # $3 is the destination directory for mirror
 
-. config
+. config || exit 1
 
 do_lftp() {
     if [ $1 = 'mirror' ]; then

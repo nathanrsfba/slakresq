@@ -4,6 +4,8 @@
 
 . config || exit 1
 
+checkroot || exit 1
+
 for bundle in ${!BUNDLE[@]}; do
     disksets="${BUNDLE[$bundle]}"
     if [ "x$disksets" != x ]; then

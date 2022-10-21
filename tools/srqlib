@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Test the truth of an argument
+# Recognized boolean truths: # 1, TRUE, T, YES, Y, ON
+# All else (including empty) is false
+# Case insensitive
+istrue() {
+    local arg
+    arg="`echo $1 | tr '[:lower:]' '[:upper:]'`"
+
+    test -z $arg && return 1
+    test $arg = 1 && return 0
+    test $arg = TRUE && return 0
+    test $arg = T && return 0
+    test $arg = YES && return 0
+    test $arg = Y && return 0
+    test $arg = ON && return 0
+
+    return 1
+}
+
+# Ensure the current user is root
+checkroot() {
+    if [ `whoami` != root ]; then
+        echo "Error: We are not root"
+        exit 1
+    fi
+}

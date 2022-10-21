@@ -2,9 +2,12 @@
 
 # Make the bundle for the given trees, default everything
 
-. config
-. live/config
-. live/livekitlib
+. config || exit 1
+. live/config || exit 1
+. live/livekitlib || exit 1
+. tools/srqlib || exit 1
+
+checkroot || exit 1
 
 bundles="$*"
 if [ x$bundles = x ]; then
