@@ -28,9 +28,11 @@ clean
         (diff, instenv, merged)
     -t: Delete the target folder (target)
     -T: Delete bundle trees (everything in trees, except 99-patches)
+    -b: Delete the base folder that contains the core bundle files (base)
     -u: Delete updates folder (updates)
     -i: Delete install disksets (install)
     -a: Delete all of the above
+    -n: Don't delete anything, but show the commands that would be executed
 
 extdiskset
     Extracts a set of disksets, and saves the resulting filesystem tree into
