@@ -34,7 +34,7 @@ if [ ! "$1" ]; then
 fi
 
 if [ $INSTALL ]; then
-    echo rm -rf install
+    echo rm -rf install initrd.img
 fi
 
 if [ $UPDATES ]; then
