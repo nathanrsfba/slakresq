@@ -19,6 +19,19 @@ buildlive
     If you give this script the -i option, it will rebuild the initramfs (and
     the rest of the boot directory), without rebuilding the core module.
 
+clean
+    Cleans up various build artifacts.
+
+    Takes a series of options depending on what you want to clean:
+
+    -m: Delete temporary folders that are only used during build processes.
+        (diff, instenv, merged)
+    -t: Delete the target folder (target)
+    -T: Delete bundle trees (everything in trees, except 99-patches)
+    -u: Delete updates folder (updates)
+    -i: Delete install disksets (install)
+    -a: Delete all of the above
+
 extdiskset
     Extracts a set of disksets, and saves the resulting filesystem tree into
     trees/. This uses overlayfs to mount a filesystem overtop base/, thus
@@ -55,6 +68,20 @@ mkall
     build was interrupted, it will continue where it left off. If things were
     added or changed, it will only rebuild the changes. This process is not
     foolproof however.
+
+    Things that mkall tests for:
+
+    * Downloads disksets that don't exist, if enabled (fetchinstall)
+    * Downloads current updates, if enabled (fetchupdates)
+    * Applies any new updates, if enabled (updatepkgs)
+    * If any of the core disksets have changed, rebuild base/ (mkbase)
+    * If any of base/ has changed, recreate the core module (buildlive)
+    * If any boot-related files in live/ have changed, recreate the boot files
+      (buildlive -i)
+    * Checks each bundle to see if its disksets have changed, and rebuild them
+      if so (extdiskset && squashbundle)
+    * Checks any bundle that isn't created from disksets (like 99-patches) for
+      changes, and recompresses them (squashbundle)
 
 prepbundles
     Runs extdiskset for all bundles defined in config
