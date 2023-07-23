@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Get rid of the login screen buttons
+kill `cat /var/run/buttons.pid`
+rm -f /var/run/buttons.pid
+
+/etc/X11/xdm/GiveConsole
+
+# Register a login (derived from GiveConsole as follows:)
+#
+exec /usr/bin/sessreg  -a -w /var/log/wtmp -u /var/run/utmp 	-x /usr/lib64/X11/xdm/Xservers -l $DISPLAY -h "" $USER
