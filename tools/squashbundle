@@ -19,7 +19,15 @@ for bundle in $bundles; do
     (
     cd trees/$bundle || exit 1
     rm -f ../../target/$LIVEKITNAME/"$bundle.$BEXT"
-    create_bundle . ../../target/$LIVEKITNAME/"$bundle.$BEXT"
+
+    # Set ownership of everything in 99-patches to root
+    if [ "$bundle" == "99-patches" ]; then
+        addopts="-all-root"
+    else
+        addopts=''
+    fi
+
+    SQUASHOPTS="$SQUASHOPTS $addopts" create_bundle . ../../target/$LIVEKITNAME/"$bundle.$BEXT"
     )
 done
 
