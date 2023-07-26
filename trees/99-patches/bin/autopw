@@ -9,7 +9,7 @@
 # user, and create some welcome messages.
 init() {
 	if head -1 /etc/shadow | grep ^root:: -q; then
-		useradd -m slakresq
+		useradd -m -G wheel slakresq
 		pass=`randpw`
 		chpasswd <<-ENDL
 			root:$pass
