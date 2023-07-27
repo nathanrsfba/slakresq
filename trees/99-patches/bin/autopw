@@ -40,16 +40,42 @@ startup() {
 	fi
 }
 
+# Listen for response from welcome dialog pipe
+welcomelisten() {
+	rm -f ~slakresq/.welcomedlg
+	mkfifo -m 700 ~slakresq/.welcomedlg
+	chown slakresq.users ~slakresq/.welcomedlg
+
+	(
+	res="`cat ~slakresq/.welcomedlg`"
+	case "$res" in
+		shutdown) poweroff > /root/welcome ;;
+		restart) reboot > /root/welcome ;;
+	esac
+	) &
+}
+
 # If the default passwords are still set, log in slakresq user directly; else,
 # disable rc.4.local and kick control back to rc.4
 startx() {
 	if isdefaultpw; then
+		welcomelisten
+
 		# This is deep voodoo
-		exec setsid -w sh -c 'exec su -l slakresq -c startx <> /dev/tty7 >&0 2>&1'
+		setsid -w sh -c 'exec su -l slakresq -c startx <> /dev/tty7 >&0 2>&1'
 	else
 		chmod a-x /etc/rc.d/rc.4.local
 		exec /etc/rc.d/rc.4
 	fi
+}
+
+# Welcome dialog
+welcomedlg() {
+	xmessage -geometry +0-0 -buttons "Close,Shut Down,Reboot" -title Welcome -file ~/WELCOME.txt 
+	case $? in
+		102) echo shutdown > ~/.welcomedlg ;;
+		103) echo restart > ~/.welcomedlg ;;
+	esac
 }
 
 # If the default passwords are still set, display the welcome message upon
@@ -59,7 +85,7 @@ xwelcome() {
 		if [ ! -e ~/.Xdefaults ]; then
 			xdefaults > ~/.Xdefaults
 		fi
-		xmessage -center -buttons OK -title Welcome -file ~/WELCOME.txt &
+		welcomedlg &
 	fi
 }
 
