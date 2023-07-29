@@ -16,6 +16,10 @@ init() {
 		touch /root/WELCOME.txt
 		chmod go-twx /root/WELCOME.txt
 		rootmsg > /root/WELCOME.txt 
+
+		mkdir -p /root/Desktop
+		ln -sf /run/initramfs/memory/data/readme.txt \
+			/root/Desktop/README.txt
 	fi
 }
 
@@ -36,6 +40,8 @@ startup() {
 # disable rc.4.local and kick control back to rc.4
 startx() {
 	if isdefaultpw; then
+		# Not sure why this isn't getting set properly
+		export HOME=/root
 		# This is deep voodoo
 		setsid -w sh -c 'startx <> /dev/tty7 >&0 2>&1'
 	else
