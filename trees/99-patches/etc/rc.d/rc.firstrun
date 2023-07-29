@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd /
+/var/lib/pkgtools/setup/setup.07.update-desktop-database
+/var/lib/pkgtools/setup/setup.11.cacerts
+/var/lib/pkgtools/setup/setup.htmlview

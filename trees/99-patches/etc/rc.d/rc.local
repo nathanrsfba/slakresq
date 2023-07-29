@@ -7,5 +7,10 @@
 # make an /etc/rc.d/rc.local_shutdown script and put those
 # commands in there.
 
+# Run some deferred setup tasks if necessary
+if [ -x /etc/rc.d/rc.firstrun ]; then
+    /etc/rc.d/rc.firstrun
+    chmod a-x /etc/rc.d/rc.firstrun
+fi
 # Set a random password and create new user
 /bin/autopw startup
