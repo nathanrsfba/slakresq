@@ -133,9 +133,9 @@ The following tweaks are made to the base Slackware install (via the
   into X will boot into runlevel 4. If X isn't detected, in runlevel it will
   automatically change to runlevel 3 during boot
 * If root has no password set, the boot scripts will create a random root
-  password, create a regular user with the same password, display a message
-  with login details at the first login prompt, and if X is installed, log
-  into X as the new user and display a similar message.
+  password, and display a message with login details on the system console. If
+  X is installed, it will autologin as root, displaying a message box with the
+  login details.
 * The default xinit session is now a script that attempts to pick an
   appropriate desktop environment based on what's installed.
 * The shutdown script passes control to the Linux Live Kit shutdown script to
