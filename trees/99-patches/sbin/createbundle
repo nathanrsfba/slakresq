@@ -1,0 +1,48 @@
+#!/bin/sh
+
+LIB="/run/initramfs/lib/livekitlib"
+CFG="/run/initramfs/lib/config"
+
+while getopts "l:c:?" arg; do
+    case $arg in
+        l) LIB="$OPTARG" ;;
+        c) CFG="$OPTARG" ;;
+        ?)
+            echo "Usage:"
+            echo "  $0 [-l livekitlib] [-c cfg] source_dir target"
+            echo
+            echo "livekitlib: Location of Linux Live library script"
+            echo "  (default $LIB)"
+            echo "config: Location of Linux Live configuration file"
+            echo "  (default $CFG)"
+            echo "source_dir: Directory to create module out of"
+            echo "target: Module file to create"
+            exit
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+if [ "$2" = "" ]; then
+    exec "$0" '-?'
+fi
+
+. "$CFG" || exit 1
+. "$LIB" || exit 1
+
+module="$2"
+
+# Add an extension if not provided
+base="`basename "$module"`"
+stub="${base%.*}"
+if [ "$stub" = "$base" ]; then
+    module="$module.$BEXT"
+fi
+
+# Append boot media directory if no directory given
+if [ "`basename "$module"`" = "$module" ]; then
+    module="/run/initramfs/memory/data/$LIVEKITNAME/$module"
+fi
+
+create_bundle "$1" "$module"

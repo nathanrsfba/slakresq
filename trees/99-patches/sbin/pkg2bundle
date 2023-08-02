@@ -4,22 +4,27 @@ TMP=''
 LIB="/run/initramfs/lib/livekitlib"
 CFG="/run/initramfs/lib/config"
 
-while getopts "t:l:c:?" arg; do
+while getopts "t:l:c:Sf?" arg; do
     case $arg in
         t) TMP="$OPTARG" ;;
         l) LIB="$OPTARG" ;;
         c) CFG="$OPTARG" ;;
+        f) FORCE=1 ;;
+        S) SAVEFAIL=1 ;;
         ?)
             echo "Usage:"
-            echo "  $0 [-t tmp] [-l livekitlib] module packages..."
+            echo "  $0 [-S] [-t tmp] [-l lib] [-c cfg] module packages..."
             echo
             echo "tmp: Directory for temporary workspace (defaults to a"
             echo "  random directory in /tmp)"
-            echo "livekitlib: Location of Linux Live library script"
-            echo "  (default $LIB)"
+            echo "lib: Location of Linux Live library script (default $LIB)"
+            echo "lib: Location of Linux Live config file (default $CFG)"
             echo "module: Name of module to create. If no directory specified,"
             echo "  places it in the boot media on the current live system"
             echo "packages: Slackware packages to make into the given module"
+            echo ""
+            echo "-f: Overwrite module if it exists"
+            echo "-S: Save temporary workspace if failure occurs"
             exit
             ;;
     esac
@@ -42,17 +47,6 @@ else
     mkdir -p "$TMP" || exit 1
 fi
 
-fs=`df --output=fstype "$TMP" | tail -1`
-if [ "$fs" = "overlay" ]; then
-	echo "The given temporary directory is on an overlayfs filesystem."
-	echo "overlayfs can't overlay over itself, so we're going to mount"
-	echo "a ramdrive and use that instead. This may fail if you're"
-	echo "building a very large module."
-	mount -t tmpfs tmpfs "$TMP" || exit 1
-	TMPFS=1
-fi
-
-
 module="$1"
 
 # Add an extension if not provided
@@ -64,39 +58,51 @@ fi
 
 # Append boot media directory if no directory given
 if [ "`basename "$module"`" = "$module" ]; then
-    module="/run/initramfs/memory/data/slakresq/$module"
+    module="/run/initramfs/memory/data/$LIVEKITNAME/$module"
 fi
 
+if [ -e "$module" -a ! "$FORCE" ]; then
+    echo "$module already exists. Use -f to override"
+    exit 1
+fi
 
+fs=`df --output=fstype "$TMP" | tail -1`
+if [ "$fs" = "overlay" ]; then
+	echo "The given temporary directory is on an overlayfs filesystem."
+	echo "overlayfs can't overlay over itself, so we're going to mount"
+	echo "a ramdrive and use that instead. This may fail if you're"
+	echo "building a very large module."
+	mount -t tmpfs tmpfs "$TMP" || exit 1
+	TMPFS=1
+fi
 shift
 
 echo "Setting up staging area in $TMP..."
 
 (
-    mkdir "$TMP/pkgs"
-    cp "$@" "$TMP/pkgs" || exit 1
-
     echo "Creating overlay filesystem..."
     mkdir -p "$TMP/diff/data" || exit 1
     mkdir -p "$TMP/diff/work" || exit 1
     mkdir "$TMP/ovl" || exit 1
 
-    mount -t overlay -o "lowerdir=/,upperdir=$TMP/diff/data,workdir=$TMP/diff/work" \
-        overlay "$TMP/ovl" || exit 1
     (
-        mkdir -p "$TMP/ovl/mnt/pkg2bundle" || exit 1
-        mount --bind "$TMP/pkgs" "$TMP/ovl/mnt/pkg2bundle"
-        chroot "$TMP/ovl" /sbin/installpkg --terse /mnt/pkg2bundle/* || FAIL=1
-        umount "$TMP/ovl/mnt/pkg2bundle" || FAIL=1
-        rmdir "$TMP/ovl/mnt/pkg2bundle" || exit 1
-        exit $FAIL
+        # Exit the subshell if interrupted, so cleanup can occur
+        trap "exit 1" INT TERM HUP
+        mount -t overlay \
+            -o "lowerdir=/,upperdir=$TMP/diff/data,workdir=$TMP/diff/work" \
+            overlay "$TMP/ovl" || exit 1
+        # We have access to the underlying root FS inside the chroot,
+        # but we may have been given paths relative to a cwd that is
+        # lost after chroot, so we'll realpath the whole lot first
+        realpath "$@" | chroot "$TMP/ovl" xargs -d '\n' \
+            /sbin/installpkg --terse || exit 1
     ) || FAIL=1
     umount "$TMP/ovl" || exit 1
     test $FAIL && exit 1
     create_bundle "$TMP/diff/data" "$module" || exit 1
 )
 
-if [ $? != 0 ]; then
+if [ $? != 0 -a "$SAVEFAIL" ]; then
     echo "Temporary files remain in $TMP"
     exit 1
 fi

@@ -1,0 +1,129 @@
+#!/bin/sh
+
+TMP=''
+
+while getopts "t:qcsS?" arg; do
+    case $arg in
+        t) TMP="$OPTARG" ;;
+        c) CLEANUP=1 ;;
+        s) SAVE=1 ;;
+        S) SAVEFAIL=1 ;;
+        q) QUIET=1 ;;
+        ?)
+            echo "Usage:"
+            echo "  $0 [-cdsSq] [-t tmp] [cmd [param...]]"
+            echo
+            echo "-c    Clean up the given temporary directory"
+            echo "-s    Save the temporary files and exit after running cmd"
+            echo "-S    Save the temporary files if failure occures"
+            echo "-q    Quiet"
+            echo
+            echo "tmp   Location of temporary workspace"
+            echo "cmd   Command to run in temporary overlay"
+            echo "param Parameters for command"
+            exit
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+# Display to stderr, unless quiet
+print() {
+    if [ $QUIET ]; then
+        return
+    fi
+    echo "$@" 1>&2
+}
+
+setup() {
+    if [ "$TMP" = "" ]; then
+        TMP=`mktemp -t -d tmproot.XXXXXXXX`
+    else
+        TMP="$TMP/tmproot"
+        rm -rf "$TMP" || exit 1
+        mkdir -p "$TMP" || exit 1
+    fi
+
+    fs=`df --output=fstype "$TMP" | tail -1`
+    if [ "$fs" = "overlay" ]; then
+        print "The given temporary directory is on an overlayfs filesystem."
+        print "overlayfs can't overlay over itself, so we're going to mount"
+        print "a ramdrive and use that instead."
+        mount -t tmpfs tmpfs "$TMP" || exit 1
+    fi
+
+    print "Setting up staging area in $TMP..."
+    (
+        print "Creating overlay filesystem..."
+        mkdir -p "$TMP/diff/data" || exit 1
+        mkdir -p "$TMP/diff/work" || exit 1
+        mkdir "$TMP/ovl" || exit 1
+
+        mount -t overlay -o \
+            "lowerdir=/,upperdir=$TMP/diff/data,workdir=$TMP/diff/work" \
+            overlay "$TMP/ovl" || exit 1
+        (
+            # Exit the subshell if interrupted, so cleanup can occur
+            trap "exit 1" INT TERM HUP
+            mount -t proc proc "$TMP/ovl/proc" || exit 1
+            mount -t sysfs sysfs "$TMP/ovl/sys" || exit 1
+            mount -t devtmpfs devtmpfs "$TMP/ovl/dev" || exit 1
+            if [ "$1" = "" ]; then
+                print "Spawning shell in temporary root."
+                chroot "$TMP/ovl"
+            elif [ $QUIET ]; then
+                chroot "$TMP/ovl" "$@" 1>&2 || exit 1
+            else
+                chroot "$TMP/ovl" "$@" || exit 1
+            fi
+        ) || FAIL=1
+        umount "$TMP/ovl/dev"
+        umount "$TMP/ovl/proc"
+        umount "$TMP/ovl/sys"
+        umount "$TMP/ovl" || exit 1
+        test $FAIL && exit 1
+    )
+}
+
+cleanup() {
+    print "Cleaning up..."
+    fs=`df --output=fstype "$TMP" | tail -1`
+    if [ $fs = tmpfs ]; then
+        umount "$TMP"
+    fi
+    rm -rf "$TMP"
+}
+
+if [ ! $CLEANUP ]; then
+    setup "$@"
+
+    if [ $? != 0 -a "$SAVEFAIL" ]; then
+        print "Temporary files remain in $TMP"
+        exit 1
+    fi
+
+    print "Filesystem changes left in $TMP/diff/data"
+    if [ $SAVE ]; then
+        echo "$TMP"
+        exit
+    fi
+
+    print "Spawning shell; exit to begin cleanup"
+    (cd "$TMP/diff/data"; $SHELL)
+
+    cleanup
+else
+    # If a parameter was given but no -t option, take it as the
+    # temp folder to clean up
+    if [ "$1" != "" ]; then
+        TMP="$1"
+    fi
+
+    if [ "$TMP" = "" ]; then
+        echo "Target directory for cleanup must be specified"
+        exit 1
+    fi
+    cleanup
+fi
+
