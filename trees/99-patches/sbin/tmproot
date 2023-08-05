@@ -128,7 +128,9 @@ if [ ! $CLEANUP ]; then
 
     print "Filesystem changes left in $TMP/diff/data"
     if [ $SAVE ]; then
-        echo "$TMP"
+        if [ $QUIET ]; then
+            echo "$TMP"
+        fi
         exit
     fi
 
