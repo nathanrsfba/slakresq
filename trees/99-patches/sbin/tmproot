@@ -40,9 +40,15 @@ setup() {
     if [ "$TMP" = "" ]; then
         TMP=`mktemp -t -d tmproot.XXXXXXXX`
     else
-        TMP="$TMP/tmproot"
-        rm -rf "$TMP" || exit 1
-        mkdir -p "$TMP" || exit 1
+        if [ ! -e "$TMP" ]; then
+            mkdir "$TMP" || exit 1
+        elif [ ! -d "$TMP" ]; then
+            echo "$TMP must be a directory"
+            exit 1
+        elif [ "`ls -A "$TMP"`" != "" ]; then
+            echo "$TMP must be empty"
+            exit 1
+        fi
     fi
 
     fs=`df --output=fstype "$TMP" | tail -1`
