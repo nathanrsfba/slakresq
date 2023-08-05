@@ -18,7 +18,7 @@ while getopts "t:l:c:Sf?" arg; do
             echo "tmp: Directory for temporary workspace (defaults to a"
             echo "  random directory in /tmp)"
             echo "lib: Location of Linux Live library script (default $LIB)"
-            echo "lib: Location of Linux Live config file (default $CFG)"
+            echo "cfg: Location of Linux Live config file (default $CFG)"
             echo "module: Name of module to create. If no directory specified,"
             echo "  places it in the boot media on the current live system"
             echo "packages: Slackware packages to make into the given module"
