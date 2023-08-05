@@ -3,13 +3,14 @@
 LIB="/run/initramfs/lib/livekitlib"
 CFG="/run/initramfs/lib/config"
 
-while getopts "l:c:?" arg; do
+while getopts "l:c:n?" arg; do
     case $arg in
         l) LIB="$OPTARG" ;;
         c) CFG="$OPTARG" ;;
+        n) NAME=1 ;;
         ?)
             echo "Usage:"
-            echo "  $0 [-l livekitlib] [-c cfg] source_dir target"
+            echo "  $0 [-n] [-l livekitlib] [-c cfg] target source_dir"
             echo
             echo "livekitlib: Location of Linux Live library script"
             echo "  (default $LIB)"
@@ -17,6 +18,8 @@ while getopts "l:c:?" arg; do
             echo "  (default $CFG)"
             echo "source_dir: Directory to create module out of"
             echo "target: Module file to create"
+            echo
+            echo "-n: Generate a bundle name but don't build anything"
             exit
             ;;
     esac
@@ -24,14 +27,18 @@ done
 
 shift $((OPTIND - 1))
 
-if [ "$2" = "" ]; then
+if [ "$1" = "" ]; then
+    exec "$0" '-?'
+fi
+
+if [ "$2" = "" -a ! "$NAME" ]; then
     exec "$0" '-?'
 fi
 
 . "$CFG" || exit 1
 . "$LIB" || exit 1
 
-module="$2"
+module="$1"
 
 # Add an extension if not provided
 base="`basename "$module"`"
@@ -45,4 +52,15 @@ if [ "`basename "$module"`" = "$module" ]; then
     module="/run/initramfs/memory/data/$LIVEKITNAME/$module"
 fi
 
-create_bundle "$1" "$module"
+# Prepend a number (100) if none given
+basename="`basename $module`"
+if [ "${basename#[0-9]}" = "$basename" ]; then
+    module="`dirname $module`/100-$basename"
+fi
+
+if [ $NAME ]; then
+    echo "$module"
+    exit
+fi
+
+create_bundle "$2" "$module"

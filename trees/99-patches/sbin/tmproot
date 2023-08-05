@@ -66,9 +66,13 @@ setup() {
         (
             # Exit the subshell if interrupted, so cleanup can occur
             trap "exit 1" INT TERM HUP
+
+	    # Mount the system filesystems in the overlay
             mount -t proc proc "$TMP/ovl/proc" || exit 1
             mount -t sysfs sysfs "$TMP/ovl/sys" || exit 1
             mount -t devtmpfs devtmpfs "$TMP/ovl/dev" || exit 1
+            mount -t devpts devpts "$TMP/ovl/dev/pts" || exit 1
+
             if [ "$1" = "" ]; then
                 print "Spawning shell in temporary root."
                 chroot "$TMP/ovl"
@@ -78,10 +82,23 @@ setup() {
                 chroot "$TMP/ovl" "$@" || exit 1
             fi
         ) || FAIL=1
-        umount "$TMP/ovl/dev"
-        umount "$TMP/ovl/proc"
-        umount "$TMP/ovl/sys"
-        umount "$TMP/ovl" || exit 1
+
+	# We use 'lazy' unmount, since kdevtmpfs sometimes likes to
+	# hold on to /dev
+        umount -l "$TMP/ovl/dev/pts"
+        umount -l "$TMP/ovl/dev"
+        umount -l "$TMP/ovl/proc"
+        umount -l "$TMP/ovl/sys"
+
+        # Unmount the overlay, and any possible submounts
+        (
+            IFS=$'\n' 
+            for dir in `findmnt -rnRo target "$TMP/ovl" | tac`; do
+                # Blow away any processes trying to use the dir
+                fuser -mks "$dir"
+                umount "$dir"
+            done
+        )
         test $FAIL && exit 1
     )
 }
