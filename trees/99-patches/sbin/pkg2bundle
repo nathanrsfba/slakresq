@@ -1,8 +1,8 @@
 #!/bin/sh
 
 TMP=''
-LIB="/run/initramfs/lib/livekitlib"
-CFG="/run/initramfs/lib/config"
+export LIB="/run/initramfs/lib/livekitlib"
+export CFG="/run/initramfs/lib/config"
 
 while getopts "t:l:c:Sf?" arg; do
     case $arg in
@@ -41,75 +41,40 @@ fi
 
 if [ "$TMP" = "" ]; then
     TMP=`mktemp -t -d pkg2bundle.XXXXXXXX`
-else
-    TMP="$TMP/pkg2bundle"
-    rm -rf "$TMP" || exit 1
-    mkdir -p "$TMP" || exit 1
 fi
 
-module="$1"
-
-# Add an extension if not provided
-base="`basename "$module"`"
-stub="${base%.*}"
-if [ "$stub" = "$base" ]; then
-    module="$module.$BEXT"
+if [ -e "$TMP" ]; then
+    if [ ! -d "$TMP" ]; then
+        echo "$TMP must be a directory"
+        exit 1
+    elif [ "`ls -A "$TMP"`" != "" ]; then
+        echo "$TMP must be empty"
+        exit 1
+    fi
 fi
 
-# Append boot media directory if no directory given
-if [ "`basename "$module"`" = "$module" ]; then
-    module="/run/initramfs/memory/data/$LIVEKITNAME/$module"
-fi
 
+module="`createbundle -n "$1"`"
 if [ -e "$module" -a ! "$FORCE" ]; then
     echo "$module already exists. Use -f to override"
     exit 1
 fi
 
-fs=`df --output=fstype "$TMP" | tail -1`
-if [ "$fs" = "overlay" ]; then
-	echo "The given temporary directory is on an overlayfs filesystem."
-	echo "overlayfs can't overlay over itself, so we're going to mount"
-	echo "a ramdrive and use that instead. This may fail if you're"
-	echo "building a very large module."
-	mount -t tmpfs tmpfs "$TMP" || exit 1
-	TMPFS=1
-fi
 shift
 
-echo "Setting up staging area in $TMP..."
-
-(
-    echo "Creating overlay filesystem..."
-    mkdir -p "$TMP/diff/data" || exit 1
-    mkdir -p "$TMP/diff/work" || exit 1
-    mkdir "$TMP/ovl" || exit 1
-
-    (
-        # Exit the subshell if interrupted, so cleanup can occur
-        trap "exit 1" INT TERM HUP
-        mount -t overlay \
-            -o "lowerdir=/,upperdir=$TMP/diff/data,workdir=$TMP/diff/work" \
-            overlay "$TMP/ovl" || exit 1
-        # We have access to the underlying root FS inside the chroot,
-        # but we may have been given paths relative to a cwd that is
-        # lost after chroot, so we'll realpath the whole lot first
-        realpath "$@" | chroot "$TMP/ovl" xargs -d '\n' \
-            /sbin/installpkg --terse || exit 1
-    ) || FAIL=1
-    umount "$TMP/ovl" || exit 1
-    test $FAIL && exit 1
-    create_bundle "$TMP/diff/data" "$module" || exit 1
-)
+# We have access to the underlying root FS inside the chroot,
+# but we may have been given paths relative to a cwd that is
+# lost after chroot, so we'll realpath the whole lot first
+realpath "$@" | tmproot -t "$TMP" -s xargs -d '\n' \
+            /sbin/installpkg --terse
+if [ $? = 0 ]; then
+    echo create_bundle "$module" "$TMP/diff/data"
+    createbundle "$module" "$TMP/diff/data"
+fi
 
 if [ $? != 0 -a "$SAVEFAIL" ]; then
     echo "Temporary files remain in $TMP"
     exit 1
 fi
 
-echo "Cleaning up..."
-if [ $TMPFS ]; then
-	umount "$TMP"
-fi
-rm -rf "$TMP"
-
+tmproot -c -t "$TMP"
