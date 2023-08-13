@@ -2,25 +2,27 @@
 
 TMP=''
 
-while getopts "t:qcsS?" arg; do
+while getopts "t:f:qcsS?" arg; do
     case $arg in
         t) TMP="$OPTARG" ;;
         c) CLEANUP=1 ;;
         s) SAVE=1 ;;
         S) SAVEFAIL=1 ;;
         q) QUIET=1 ;;
+        f) FULLROOT="$OPTARG" ;;
         ?)
             echo "Usage:"
-            echo "  $0 [-cdsSq] [-t tmp] [cmd [param...]]"
+            echo "  $0 [-cdsSq] [-t tmp] [-f fullroot] [cmd [param...]]"
             echo
-            echo "-c    Clean up the given temporary directory"
-            echo "-s    Save the temporary files and exit after running cmd"
-            echo "-S    Save the temporary files if failure occures"
-            echo "-q    Quiet"
+            echo "-c       Clean up the given temporary directory"
+            echo "-s       Save the temporary files and exit after running cmd"
+            echo "-S       Save the temporary files if failure occures"
+            echo "-q       Quiet"
             echo
-            echo "tmp   Location of temporary workspace"
-            echo "cmd   Command to run in temporary overlay"
-            echo "param Parameters for command"
+            echo "tmp      Location of temporary workspace"
+            echo "cmd      Command to run in temporary overlay"
+            echo "fullroot Mount readonly copy of root in directory in workspace"
+            echo "param    Parameters for command"
             exit
             ;;
     esac
@@ -79,6 +81,12 @@ setup() {
             mount -t devtmpfs devtmpfs "$TMP/ovl/dev" || exit 1
             mount -t devpts devpts "$TMP/ovl/dev/pts" || exit 1
 
+            if [ $FULLROOT ]; then
+                mkdir -p "$TMP/ovl/$FULLROOT" || exit 1
+                mount --rbind -o ro / "$TMP/ovl/$FULLROOT" || exit 1
+                mount --make-rslave "$TMP/ovl/$FULLROOT" || exit 1
+            fi
+
             if [ "$1" = "" ]; then
                 print "Spawning shell in temporary root."
                 chroot "$TMP/ovl"
@@ -95,6 +103,16 @@ setup() {
         umount -l "$TMP/ovl/dev"
         umount -l "$TMP/ovl/proc"
         umount -l "$TMP/ovl/sys"
+
+        if [ $FULLROOT ]; then
+        # Unmount everything in the root bind
+        (
+            IFS=$'\n' 
+            for dir in `findmnt -rnRo target "$TMP/ovl/$FULLROOT" | tac`; do
+                umount "$dir" || umount -l "$dir"
+            done
+        )
+        fi
 
         # Unmount the overlay, and any possible submounts
         (
