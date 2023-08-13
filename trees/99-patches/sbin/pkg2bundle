@@ -62,10 +62,24 @@ fi
 
 shift
 
-# We have access to the underlying root FS inside the chroot,
-# but we may have been given paths relative to a cwd that is
-# lost after chroot, so we'll realpath the whole lot first
-realpath "$@" | tmproot -t "$TMP" -s xargs -d '\n' \
+# Resolve the full path to the given package.
+resolvepkgs() {
+    for f in "$@"; do
+        # We have access to the underlying root FS inside the chroot, but we
+        # may have been given paths relative to a cwd that is lost after
+        # chroot, so we'll realpath the whole lot first
+        f="`realpath "$f"`"
+
+        # Access the package from the /outer directory, which is a bind mount
+        # of the real root. This ensures access to the package even if it's
+        # on another filesystem
+        f="/outer$f"
+
+        echo "$f"
+    done
+}
+
+resolvepkgs "$@" | tmproot -t "$TMP" -f /outer -s xargs -d '\n' \
             /sbin/installpkg --terse
 if [ $? = 0 ]; then
     echo create_bundle "$module" "$TMP/diff/data"
