@@ -32,7 +32,29 @@ done
 
 shift $((OPTIND - 1))
 
-if [ "$2" = "" ]; then
+if [ "$1" = "" ]; then
+    exec "$0" '-?'
+fi
+
+module=$1
+if [ "${module%.t?z}" != "$module" ]; then
+    # Looks like the user didn't specify a module. Try to create a module name
+    # from the first package given
+
+    module="`basename "$module"`"
+    module="`echo "$module" | sed 's?.*/??;s/\.t[bglx]z$//'`"
+    module="`echo "$module" | sed 's?-[^-]*-[^-]*-[^-]*$??'`"
+else
+    shift
+fi
+
+module="`createbundle -n "$module"`"
+if [ -e "$module" -a ! "$FORCE" ]; then
+    echo "$module already exists. Use -f to override"
+    exit 1
+fi
+
+if [ "$1" = "" ]; then
     exec "$0" '-?'
 fi
 
@@ -53,14 +75,6 @@ if [ -e "$TMP" ]; then
     fi
 fi
 
-
-module="`createbundle -n "$1"`"
-if [ -e "$module" -a ! "$FORCE" ]; then
-    echo "$module already exists. Use -f to override"
-    exit 1
-fi
-
-shift
 
 # Resolve the full path to the given package.
 resolvepkgs() {
