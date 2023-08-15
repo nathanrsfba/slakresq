@@ -114,3 +114,5 @@ squashbundle
 
     By default, creates bundles out of all folders in trees/
 
+srqlib
+    Some miscellaneous functions used by the other scripts
