@@ -1,8 +1,9 @@
 #!/bin/bash
 
+. tools/srqlib || exit 1
+checklive || exit 1
 . config || exit 1
 . live/config || exit 1
-. tools/srqlib || exit 1
 
 checkroot || exit 1
 

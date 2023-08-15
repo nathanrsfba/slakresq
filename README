@@ -12,11 +12,11 @@ Some notes:
 * The tools must be run as root. If you're su-ing or sudo-ing from a non-root
   user, you may wish to ensure that /sbin and /usr/sbin are in your path.
 * This process requires support for overlayfs in order to build the bundles.
-* If you clone this from github, make sure to also clone the live directory,
-  which is a submodule (I.E. a separate git repository). You can do this by
-  specifying '--recurse-submodules' when you clone it, or you can do 'git
-  submodule --init live' after the fact. If you downloaded a tarball,
-  everything should be present already.
+* The live/ directory is a submodule (I.E. a separate git repository). Git
+  will not automatically fetch this if you clone the repository, unless you
+  give the '--recurse-submodules' option when you clone it. You can also do
+  'git submodule update --init' after the fact. The relevant tools will do
+  this automatically if necessary.
 
 Creating a live system involves the following steps:
 

@@ -26,3 +26,15 @@ checkroot() {
         exit 1
     fi
 }
+
+# Fetch the live submodule if not present
+checklive() {
+    if [ -d live ]; then
+        if [ "`ls -A live`" ]; then
+            return
+        fi
+    fi
+
+    echo "Fetching live submodule..."
+    git submodule update --init
+}
