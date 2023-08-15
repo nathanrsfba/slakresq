@@ -1,0 +1,243 @@
+# This contains what will be the readme.txt on the target USB stick for the
+# end user. This gets copied over to the live/ directory during the build
+# process, as that's where Linux-Live expects it
+#
+# Lines containing # are ignored
+#
+Hello, and welcome to SlakResQ.
+
+This is a USB-bootable live Slackware distribution, based on Tomas Matejicek's
+Linux Live Kit.
+
+This is built with the same live kit used to build Slax. Whereas Slax is a
+fairly minimal distribution, which can be customized by installing packages,
+SlakResQ is designed to be a more or less full (yet modular) Slackware
+install out of the box. It also has some of the same features of Slax -- such
+as the ability to preserve changes to the filesystem between reboots, even on
+USB sticks with FAT filesystems.
+
+As the name implies, this was originally designed as a 'rescue' boot disk, for
+repairing crashed systems. However, as a full (depending on how this
+particulary copy was built) Slackware installation, it has all the power of
+Slackware available to it.
+
+Installing onto USB
+-------------------
+
+If you're using a computer with an EFI BIOS (who isn't nowadays?) you can
+simply copy the entire contents of this folder to the root of a USB stick, and
+your computer should be able to boot from it. You may need to activate a menu
+on boot to tell the computer to boot from the USB stick; this procedure varies
+between manufacturers.
+
+If you're trying to boot off an older machine without EFI support, you'll need
+to go into the slakresq/boot folder and run bootinst.bat (on Windows) or
+bootinst.sh (on Linux) to install a bootloader to the USB stick. This may
+generate an error about not being able to move the EFI folder; this is normal,
+as the EFI folder has already been moved into the appropriate place.
+
+Booting from CD/DVD is currently not supported.
+
+Using SlakResQ
+--------------
+
+While this is more or less a 'stock' Slackware install, a few amenities have
+been added:
+
+* The default configuration will attempt to boot directly into X if it's
+  installed.
+* The root password is set randomly upon first boot. A message displays on the
+  first virtual terminal (and on X if it's installed) giving the password
+  until either it gets changed, or another user added.
+* By default, anyone in the wheel group as access to sudo. They will be asked
+  for their own password (not root's) when using it.
+* If using xdm as the display manager (the default if KDE is not installed),
+  some buttons will appear in the corner to shutdown or restart the system
+  without logging in.
+
+Customization
+-------------
+
+Like Slax, SlakResQ is modular: You can add modules to the `slakresq` folder,
+and they will be merged into the root filesystem upon boot. They are loaded in
+ASCII sort order; as such, it can be useful to prefix them with numbers to
+control the order they load in. The default modules do so.
+
+You can also create a `rootcopy` folder in the slakresq folder. Anything in
+here will be copied to the root directory on boot. This can be used to
+customize a particular install without having to recreate modules.
+
+You can convert a Slackware package, or set of packages, into a module using
+the included pkg2bundle tool from within a SlakResQ instance. Pass it the name
+of a module to create, and one or more Slackware packages, and it will create
+and install a SlakResQ module that will be activated at the next boot.
+
+AlienBob's repository (http://www.slackware.com/~alien/slackbuilds/) is a good
+source of Slackware packages for common apps, and slackbuilds.org provides
+many scripts for building software into Slackware packages.
+
+Persistence
+-----------
+
+The default boot option actives persistent changes; this will store any
+changes made to the filesystem to the boot media, where it will be reactivated
+on the next boot. If this is not enabled, everything is saved on a ramdisk,
+which will be lost when the system is shut down or rebooted.
+
+The changes are stored in a folder called `changes` in the `slakresq` folder
+on the boot media. On a FAT filesystem (the norm for something like a USB
+stick), an image file is created with an EXT2 filesystem, and changes are
+stored within. This is a dynamically-expanding image, only using as much disk
+space as the files contained in it. On a Posix-compatible filesystem, the
+changes are stored directly in the `changes` folder.
+
+On a FAT filesystem, the changes image is limited to 4GB -- a limitation of
+FAT itself.
+
+Included Tools
+--------------
+
+The SlakResQ live environment contains a few tools in /sbin to aid in creation
+of new modules:
+
+pkg2bundle:
+
+As previously discussed, this creates a new module out of a Slackware package
+(or set of packages.) The name of the module is the first parameter, and
+subsequent parameters are the packages to make into a module. This needs to be
+run as root, since it creates a chroot jail to work in.
+
+By default, the module will be placed in the slakresq folder on the boot
+media. If you want to place it elsewhere, simply provide a directory name with
+the module. For instance, `./module` will create a module in the current
+directory.
+
+If you don't prefix the module with a number, the module will be prefixed with
+`100-`. This will cause it to be loaded *after* all the stock SlakResQ
+modules. Also, if you don't give an extension, the `.srq` extension will be
+added automatically.
+
+If the given module already exists, pkg2bundle will refuse to overwrite it,
+unless you specify `-f`.
+
+By default, pkg2bundle will create a tmpfs mount to use as a temporary
+workspace. If you're building an extremely large module, you might run out of
+memory. If you have a POSIX compliant filesystem mounted somewhere handy, you
+can specify a temporary directory using the `-t` option. Note that due to
+technical limitations of overlayfs, this directory can't be on an overlayfs
+filesystem -- thus the need for making a tmpfs in the first place.
+
+`-l` and `-c` specify the paths to the livekitlib library and the linuxlive
+configuration scripts. If you have the SlakResQ creation scripts installed,
+you can use this to create a bundle from outside of a booted SlakResQ
+environment. This probably will only work if your build system is running
+Slackware.
+
+`-S` saves the temporary workspace if module creation fails. Make sure to
+clean up the temp directory (and unmount it if it's a tmpfs) afterwards. This
+is mainly useful for debugging purposes.
+
+tmproot:
+
+tmproot creates a chroot jail in a temporary workspace which you can use for
+building packages and/or modules without cluttering up your live root.
+
+By default, just running `tmproot` will create a temporary workspace on a
+tmpfs, and spawn you into a shell inside it. You will be in what appears to be
+the actual root filesystem, but any changes you make are saved in a temporary
+directory.
+
+During this process, a copy of /dev, /proc, and /sys will be mounted
+in the temporary root, and unmounted again during cleanup. On cleanup, tmproot
+will also attempt to unmount any filesystems you may have mounted, and kill
+any processes that may be holding onto them.
+
+Note that this temporary root workspace only contains the root filesystem
+itself; any other mounted filesystems will not appear. If you need files from
+another mount, you can call tmproot with the `-f` parameter. This takes the
+given path, and mounts a readonly copy of the root filesystem in that
+directory in the temporary workspace.
+
+Once you exit the shell, you'll be spawned into another shell; this time in
+the 'real' root filesystem. You'll be in the temporary directory where your
+changes have been saved. You can create a module using the createbundle
+command, or save your changes in some other manner of your devising. In
+particular, if you've built some packages using sbotools or something of that
+nature, you can use pkg2bundle to make a module of those packages, and/or save
+them someplace for safekeeping.
+
+Once you exit this second shell, all temporary changes will be flushed, and
+any temporary filesystems unmounted.
+
+tmproot also takes the following options:
+
+* -t: Specify a temporary directory to use for temporary storage.
+* -f: Specify a directory within the temporary workspace to mount a readonly
+  copy of the original root filesystem
+* -q: Quiet. tmproot will not create any output of its own, and any
+  subprocesses it spawns will be directed to stderr.
+* -s: Instead of spawning a shell for you to save your changes, tmproot will
+  exit with the working directory preserved. If `-q` is specified with this
+  option, the path to the temporary directory will be printed to stdout, for
+  capture by scripts. The actual changes to the file system will be stored in
+  the `diff/data` directory within the temporary directory, whether specified
+  with `-t` or autogenerated.
+* -c: Clean up the given temporary directory, to be used with `-s`. This
+  should be given the path to the *main* temporary directory, and not the
+  `diff/data` subdirectory.
+
+You can also specify a command to run on the tmproot command line. This will
+be run in the temporary root, instead of spawning a shell. This is intended
+for use by scripts, in conjunction with the `-s` option: Specify the command
+to run, capture the output, then run tmproot again with the `-c` parameter.
+
+Note that scripts that use `-s` without `-q` will need to specify their own
+temporary directory with `-t`, otherwise they will not know where the
+temporary workspace is.
+
+createbundle:
+
+This tool creates a module from the given directory tree. The contents of the
+tree get mixed into the root directory of the booted system.
+
+The syntax is:
+```
+  createbundle [-n] [-l livekitlib] [-c cfg] target source_dir
+```
+
+target is the name of the target bundle; source_dir is the directory to make
+into a bundle.
+
+As with pkg2bundle, the modulename automatically has a path, numeric prefix,
+and extension added, if not provided. You can give the `-n` parameter to show
+the full path of the bundle that will be created, without actually creating
+it.
+
+The `-l` and `-c` parameters, as with pkg2bundle, specify a path to the
+Linux-Live library and configuration files. On a running SlakResQ system these
+will be set automatically.
+
+Boot Options
+------------
+
+The following options can be specified on the boot command line from syslinux:
+
+* perch: Activate persistent changes. These will be saved in the `changes`
+  folder under `slakresq`. The default boot option does this.
+* snapshot: Save any persistent changes to a module in the `slakresq` folder.
+  This can be useful if the changes image file gets full, or if you want to
+  compress it to save space.  This can be done multiple times, saving to a new
+  module each time. This may delay the boot process a bit while the image is
+  compressed; you can also use `snapshotquick` to make an uncompressed module,
+  which is faster but takes up more space.
+* toram: Copy all modules to a ramdisk before booting; this allows the boot
+  media to be unmounted and removed.
+* noload=<regex>: Specify a set of modules to prevent loading. This is a
+  regular expression, so you can simply specify a list of modules separated by
+  the | character.
+* from=<dir>: Look for data in the given folder, instead of `slakresq`
+* 4: Boots into runlevel 4 (instead of the default 3), which autostarts X. The
+  default boot menu option does this. You can also specify other runlevels on
+  the command line, similar to a normal Linux installation.
+
+
