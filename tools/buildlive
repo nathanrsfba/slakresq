@@ -21,6 +21,12 @@ checkroot || exit 1
 
 echo "Building the live boot image..."
 
+# If we have a bootinfo.txt that's newer than the one in live, copy it over
+
+if [ bootinfo.txt -nt live/bootinfo.txt ]; then
+    cp bootinfo.txt live/bootinfo.txt || exit 1
+fi
+
 (
 # Exit the subshell if interrupted, so cleanup can occur
 trap "exit 1" INT TERM HUP
