@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Test the truth of an argument
-# Recognized boolean truths: # 1, TRUE, T, YES, Y, ON
+# Recognized boolean truths: 1, TRUE, T, YES, Y, ON
 # All else (including empty) is false
 # Case insensitive
 istrue() {
