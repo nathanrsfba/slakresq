@@ -19,7 +19,7 @@ while getopts 'bniutTma?' arg; do
             ;;
 
         '?')
-            echo "Usage: `basename $0` [-iutTma]"
+            echo "Usage: `basename $0` [-iutTmbna]"
             echo ''
             echo '-m    Delete temporary folders'
             echo '-t    Delete target folder'
