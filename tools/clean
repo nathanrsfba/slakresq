@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts 'niutTma?' arg; do
+while getopts 'bniutTma?' arg; do
     case $arg in
         i) INSTALL=1;;
         u) UPDATES=1;;
