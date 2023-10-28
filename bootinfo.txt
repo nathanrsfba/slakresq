@@ -228,7 +228,7 @@ The syntax is:
 installkernel [-k kernel] [-V kver] [-c cmdline] [-n name]
 ```
 
-If run without paremeters, it will install whatever kernel currently occupies
+If run without parameters, it will install whatever kernel currently occupies
 /boot/vmlinuz, and attempt to detect the appropriate options based on the
 contents of /boot/vmlinuz and /proc/cmdline. For a kernel installed from an
 official Slackware package, this should work automatically. Alternately, you
