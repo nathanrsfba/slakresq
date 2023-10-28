@@ -217,6 +217,37 @@ The `-l` and `-c` parameters, as with pkg2bundle, specify a path to the
 Linux-Live library and configuration files. On a running SlakResQ system these
 will be set automatically.
 
+installkernel:
+
+This tool can be used inside a running SlakResQ system to update the
+bootloader and initrd to load a new kernel.
+
+The syntax is:
+
+```
+installkernel [-k kernel] [-V kver] [-c cmdline] [-n name]
+```
+
+If run without paremeters, it will install whatever kernel currently occupies
+/boot/vmlinuz, and attempt to detect the appropriate options based on the
+contents of /boot/vmlinuz and /proc/cmdline. For a kernel installed from an
+official Slackware package, this should work automatically. Alternately, you
+can specify a particular kernel binary with the `-k` option. 
+
+Normally the kernel version will be detected from the kernel file itself. If
+for some reason this fails, you can specify it with `-V`. The kernel command
+line is coped from /proc/cmdline, which should set the proper command line to
+boot into SlakResQ. You can specify this manually with `-c`.
+
+Normally, installkernel will replace the existing kernel and initrd, move
+the original ones to a separate folder, and create a 'fallback' entry for them
+in the boot menu; you can use these if the new kernel fails to boot.
+
+Alternately, you can place the new kernel and initrd in a separate folder,
+create a boot entry for them, and leave the original in place. To do this,
+specify the `-n` option with the name you would like to give to the new boot
+entry.
+
 Boot Options
 ------------
 
