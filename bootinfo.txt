@@ -21,6 +21,12 @@ repairing crashed systems. However, as a full (depending on how this
 particulary copy was built) Slackware installation, it has all the power of
 Slackware available to it.
 
+Version
+-------
+
+This is SlakResQ Version 1.0.0. It is based off Slackware 15.0, with all
+updates available as of 2023-10-28, except for the kernel update.
+
 Installing onto USB
 -------------------
 
@@ -91,8 +97,7 @@ stored within. This is a dynamically-expanding image, only using as much disk
 space as the files contained in it. On a Posix-compatible filesystem, the
 changes are stored directly in the `changes` folder.
 
-On a FAT filesystem, the changes image is limited to 4GB -- a limitation of
-FAT itself.
+By default, the persistence image is configured to hold up to 16GB of data.
 
 Included Tools
 --------------
@@ -255,6 +260,11 @@ The following options can be specified on the boot command line from syslinux:
 
 * perch: Activate persistent changes. These will be saved in the `changes`
   folder under `slakresq`. The default boot option does this.
+* perchsize=<size>: Specifies the size of the persistence files, in MB.
+  Default value is 16000. If the given size is larger than 4GB, the image will
+  be split into multiple files, to avoid FAT file size limitations.
+* perchfile=<name>: Specifies the name of the file(s) to store persistent
+  changes in.  Default is `changes.dat`
 * snapshot: Save any persistent changes to a module in the `slakresq` folder.
   This can be useful if the changes image file gets full, or if you want to
   compress it to save space.  This can be done multiple times, saving to a new
@@ -267,6 +277,9 @@ The following options can be specified on the boot command line from syslinux:
   regular expression, so you can simply specify a list of modules separated by
   the | character.
 * from=<dir>: Look for data in the given folder, instead of `slakresq`
+* automount: Attempt to detect and mount any filesystems on hard drives
+* debug: Pauses the startup and shutdown process to provide debbug info.
+  Mainly useful if you're modifying SlakResQ or Linux Live itself.
 * 4: Boots into runlevel 4 (instead of the default 3), which autostarts X. The
   default boot menu option does this. You can also specify other runlevels on
   the command line, similar to a normal Linux installation.
