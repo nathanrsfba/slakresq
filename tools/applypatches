@@ -1,0 +1,39 @@
+#!/bin/sh
+
+find patches -type f | while read patch; do
+    # File extension
+    suf=${patch##*.}
+    # Path to original file
+    path=${patch#*/} # Strip the patches/ leader
+    path=${path%.*}  # Strip the extension
+    # Path to destination file
+    dest="trees/99-patches/${path#*/}"
+    # First component of path
+    first=${path%%/*}
+
+    case $first in
+        base)
+            # If patch in 'base' directory, leave alone
+            ;;
+        *)
+            # Otherwise, original is expected in trees/ directory
+            path="trees/$path"
+            ;;
+    esac
+
+    # echo "$patch|$suf|$path|$dest|$first"
+    case $suf in
+        diff)
+            if [ ! -e "$dest" -o "$path" -nt "$dest" -o "$patch" -nt "$dest" ]; then
+                mkdir -p "`dirname "$dest"`" || exit 1
+                cp -a "$path" "$dest" || exit 1
+                patch "$dest" "$patch" || exit 1
+            fi
+            ;;
+        *)
+            echo "Unknown patch file: $patch"
+            ;;
+    esac
+done
+
+
