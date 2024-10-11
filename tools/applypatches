@@ -1,11 +1,9 @@
 #!/bin/sh
 
-find patches -type f | while read patch; do
-    # File extension
-    suf=${patch##*.}
+# Get list of patche files sans extensions
+find patches -type f | sed 's/\.[^.]*$//' | sort | uniq | while read patch; do
     # Path to original file
     path=${patch#*/} # Strip the patches/ leader
-    path=${path%.*}  # Strip the extension
     # Path to destination file
     dest="trees/99-patches/${path#*/}"
     # First component of path
@@ -21,19 +19,60 @@ find patches -type f | while read patch; do
             ;;
     esac
 
-    # echo "$patch|$suf|$path|$dest|$first"
-    case $suf in
-        diff)
-            if [ ! -e "$dest" -o "$path" -nt "$dest" -o "$patch" -nt "$dest" ]; then
-                mkdir -p "`dirname "$dest"`" || exit 1
+    for pfile in "$patch".*; do
+        # echo "$patch|$path|$dest|$pfile"
+
+        if [ ! -e "$path" ]; then
+            # If we don't have the source file, ignore
+            continue
+        fi
+        if [ -e "$dest" -a "$dest" -nt "$path" -a "$dest" -nt "$pfile" ]; then
+            # Destination is newer than sources, ignore
+            continue
+        fi
+
+        # Otherwise, apply the patch
+        suf=${pfile##*.}
+        mkdir -p "`dirname "$dest"`" || exit 1
+
+        case $suf in
+            diff|patch)
                 cp -a "$path" "$dest" || exit 1
-                patch "$dest" "$patch" || exit 1
-            fi
-            ;;
-        *)
-            echo "Unknown patch file: $patch"
-            ;;
-    esac
+                patch "$dest" "$pfile" || exit 1
+                ;;
+            append)
+                echo "Appending to $path..."
+                cat "$path" "$pfile" > "$dest" || exit 1
+                chmod --reference="$path" "$dest" || exit 1
+                chown --reference="$path" "$dest" || exit 1
+                ;;
+            preend)
+                echo "Preending to $path..."
+                cat "$pfile" "$path" > "$dest" || exit 1
+                chmod --reference="$path" "$dest" || exit 1
+                chown --reference="$path" "$dest" || exit 1
+                ;;
+            chown)
+                echo "Setting ownership on $path..."
+                cp -a "$path" "$dest" || exit 1
+                cat "$pfile" | (
+                    read mode owner
+                    chmod $mode "$dest"
+                    if [ "$owner" != "" ]; then
+                        chown $owner "$dest"
+                    fi
+                )
+                touch "$dest"
+                ;;
+            sh)
+                echo "Calling patch script on $path..."
+                sh "$pfile" "$path" "$dest" || exit 1
+                ;;
+            *)
+                echo "Unknown patch file: $pfile"
+                ;;
+        esac
+    done
 done
 
 
