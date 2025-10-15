@@ -1,0 +1,22 @@
+type=patch
+tree=90-x11
+path=etc/X11/xdm/Xresources
+-----
+--- trees/90-x11/etc/X11/xdm/Xresources	2021-02-13 05:12:10.000000000 -0800
++++ trees/99-patches/etc/X11/xdm/Xresources	2023-07-22 23:35:53.000000000 -0700
+@@ -80,3 +80,15 @@
+ Chooser*label.label:		XDMCP Host Menu from CLIENTHOST
+ Chooser*list.font:		-*-*-medium-r-normal-*-*-230-*-*-c-*-iso8859-1
+ Chooser*Command.font:		*-new century schoolbook-bold-r-normal-*-180-*
++
++.Xmessage.form.message.scrollVertical:		never
++.Xmessage.form.message.scrollHorizontal:	never
++.Xmessage.form.message.background:		steelblue
++.Xmessage.geometry:				-0-0
++.Xmessage.form.background:			steelblue
++.Xmessage.form.Command.font:			-misc-fixed-*-*-*-*-15-*-*-*-*-*-*-*
++.Xmessage.form.Command.foreground:		#ffffff
++.Xmessage.form.Command.background:		steelblue
++.Xmessage.form.Command.shapeStyle:		Rectangle
++.Xmessage*borderColor:				steelblue
++

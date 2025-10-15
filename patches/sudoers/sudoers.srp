@@ -1,0 +1,17 @@
+[slakresq]
+type=patch
+tree=10-console
+path=/etc/sudoers
+dest=patches
+-----
+--- trees/10-console/etc/sudoers	2023-12-30 11:25:21.000000000 -0800
++++ trees/99-patches/etc/sudoers	2024-10-10 18:10:28.369906923 -0700
+@@ -105,7 +105,7 @@
+ root ALL=(ALL:ALL) ALL
+ 
+ ## Uncomment to allow members of group wheel to execute any command
+-# %wheel ALL=(ALL:ALL) ALL
++%wheel ALL=(ALL:ALL) ALL
+ 
+ ## Same thing without a password
+ # %wheel ALL=(ALL:ALL) NOPASSWD: ALL

@@ -1,0 +1,15 @@
+type=patch
+tree=90-x11
+path=etc/X11/xdm/xdm-config
+-----
+--- trees/90-x11/etc/X11/xdm/xdm-config	2021-02-13 05:12:10.000000000 -0800
++++ trees/99-patches/etc/X11/xdm/xdm-config	2023-07-22 23:25:15.000000000 -0700
+@@ -29,7 +29,7 @@
+ DisplayManager*authComplain:	true
+ ! The following three resources set up display :0 as the console.
+ DisplayManager._0.setup:	/usr/lib64/X11/xdm/Xsetup_0
+-DisplayManager._0.startup:	/usr/lib64/X11/xdm/GiveConsole
++!DisplayManager._0.startup:	/usr/lib64/X11/xdm/GiveConsole
+ DisplayManager._0.reset:	/usr/lib64/X11/xdm/TakeConsole
+ 
+ DisplayManager*loginmoveInterval:	10

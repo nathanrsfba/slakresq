@@ -1,0 +1,43 @@
+Options in a patch file:
+
+* tree: The name of the tree the original appears in, or `base` if it's the
+  base tree. If the tree does not exist, the patch is ignored.
+* path: The path to the file (or for some operations, directory) in question.
+* dir: The directory of the file in question. The filename will be taken from
+  the base of the .srp file, appended to this directory, and then proceed as
+  if said combination was provided as `path`.
+* from: The path to the *source* file to be patched, if it lives at a
+  different path than specified in `file`. Both the original and patched file
+  will appear in the final tree
+* replace: Same as `from` but the original will be removed from the final
+  tree.
+* dest: One of the following:
+    * orig: The resulting file(s) will be placed in the module the original
+      appeared in. This requires the module to be rebuilt if a patch is added
+      or modified.
+    * patches: The resulting file(s) will be placed in the 99-patches module.
+      This requires 99-patches to be rebuilt if a patch is added or modified.
+* external: The name of the file containing the patch content.
+* type: The type of modification to perform:
+    * patch: The content is a patch to be appilied using patch(1)
+    * prepend: Paste the content at the top of the original. If the original
+      has a hasbang at the top, the content is pasted just below it
+    * append: Paste the content at the bottom of the original
+    * new: The content is placed in the target in its entirety. This can be
+      used to either insert a totally new file, or replace an existing file
+      wholesale.
+    * script: The content is run as a script. (Details to follow: Arguments
+      and cwd?)
+    * copy: Copy the original file unchanged. This can be useful if you simply
+      want to set file modes or ownership. If `from` or `replace` is provided,
+      the file is effectively copied or renamed.
+    * tar: The content is a tar file that will be extracted to the path
+      specified in the `path` parameter. In this case, `path` is expected to
+      be a directory.
+    * delete: The file will be removed from the given tree entirely. If `dest`
+      is `patches`, an appropriate entry will be generated in 99-patches to
+      inhibit its appearance in the resulting filesystem.
+    * link: A symbolic link will be created pointing `path` to `from`
+* chmod: Change the mode of the resulting file
+* owner: Change the owner of the resulting file
+* group: Change the group of the resulting file

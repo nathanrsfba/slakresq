@@ -1,0 +1,18 @@
+type=patch
+tree=90-x11
+path=etc/X11/xdm/Xstartup
+-----
+--- trees/90-x11/etc/X11/xdm/Xstartup	2021-02-13 05:12:10.000000000 -0800
++++ trees/99-patches/etc/X11/xdm/Xstartup	2023-07-22 23:26:57.000000000 -0700
+@@ -1,4 +1,11 @@
+ #!/bin/sh
++
++# Get rid of the login screen buttons
++kill `cat /var/run/buttons.pid`
++rm -f /var/run/buttons.pid
++
++/etc/X11/xdm/GiveConsole
++
+ # Register a login (derived from GiveConsole as follows:)
+ #
+ exec /usr/bin/sessreg  -a -w /var/log/wtmp -u /var/run/utmp 	-x /usr/lib64/X11/xdm/Xservers -l $DISPLAY -h "" $USER

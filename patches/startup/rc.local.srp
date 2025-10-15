@@ -1,0 +1,11 @@
+type=append
+tree=base
+path=etc/rc.d/rc.local
+-----
+# Run some deferred setup tasks if necessary
+if [ -x /etc/rc.d/rc.firstrun ]; then
+    /etc/rc.d/rc.firstrun
+    chmod a-x /etc/rc.d/rc.firstrun
+fi
+# Set a random password and create new user
+/bin/autopw startup

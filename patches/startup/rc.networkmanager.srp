@@ -1,0 +1,4 @@
+type=copy
+chmod=0755
+tree=10-console
+file=/etc/rc.d/rc.networkmanager

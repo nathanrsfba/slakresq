@@ -1,0 +1,45 @@
+type=patch
+tree=base
+file=/etc/rc.d/rc.6
+-----
+--- base/etc/rc.d/rc.6	2021-11-10 13:50:54.000000000 -0800
++++ trees/99-patches/etc/rc.d/rc.6	2024-10-06 16:29:53.302385810 -0700
+@@ -200,7 +200,8 @@
+ fi
+ 
+ # Kill all remaining processes.
+-OMITPIDS="$(for p in $(pgrep mdmon); do echo -o $p; done)" # Don't kill mdmon
++# TM: also omit mount.* processes (fuse fs for Slax)
++OMITPIDS="$(for p in $(pgrep "mdmon|mount[.]"); do echo -o $p; done)" # Don't kill mdmon
+ if [ ! "$1" = "fast" ]; then
+   echo "Sending all processes the SIGTERM signal."
+   /sbin/killall5 -15 $OMITPIDS
+@@ -323,6 +324,28 @@
+   echo "LXC container stopped."
+ fi
+ 
++if [ -x /run/initramfs/shutdown ]; then
++
++   cd /run/initramfs
++   mkdir oldroot
++   pivot_root . oldroot
++
++   cd /
++   mount -t proc proc proc
++   mount -t sysfs sysfs sys
++
++   # create bogus /sbin/init
++   echo "#!/bin/sh" > /sbin/init
++   echo "sleep 99999" >> /sbin/init
++
++   # re-execute /sbin/init (it will start the one in current pivot root)
++   bin/chroot oldroot /sbin/telinit u
++
++   # run shutdown script
++   exec bin/chroot . bin/sh shutdown $shutdown_command < dev/console > dev/console 2>&1
++   # it ends here
++fi
++
+ # Now halt (poweroff with APM or ACPI enabled kernels) or reboot.
+ if [ "$shutdown_command" = "reboot" ]; then
+   echo "Rebooting."

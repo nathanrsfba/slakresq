@@ -1,0 +1,6 @@
+type=link
+chmod=0755
+tree=90-x11
+path=/etc/X11/xinit/xinitrc
+from=/etc/X11/xinit/xinitrc.auto
+
