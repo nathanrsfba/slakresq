@@ -108,6 +108,7 @@ main() {
     echo "Source path: $orig"
     echo "Physical source root: $sourceroot"
     echo "Physical source path: $sourcepath"
+    echo "Physical (original) source path: $origpath"
     echo "Physical target root: $destroot"
     echo "Physical target path: $destpath"
     
@@ -120,19 +121,27 @@ main() {
         new) 
             cp "$patch" "$destpath" || exit 1
             ;;
-        prepend)
-            if grep -q '^#!' "$sourcepath"; then
-                head -1 "$sourcepath" > "$destpath" || exit 1
-                cat "$patch" >> "$destpath" || exit 1
-                tail -n +2 "$sourcepath" >> "$destpath" || exit 1
+        insert|prepend)
+            if [ "$before$after" != "" ]; then
+                local match="$before$after"
+                local line="`grep -m 1 -n -E "$match" "$sourcepath" |
+                    cut -d : -f 1`" || exit 1
+                if [ "$after" != "" ]; then
+                    line=$((line + 1))
+                fi
+            elif [ "$skip" != "" ]; then
+                local line="`grep -n -m 1 -v -E "$skip" "$sourcepath" |
+                    cut -d : -f 1`" || exit 1
             else
-                cat "$patch" "$sourcepath" > "$destpath" || exit 1
+                line=1
             fi
+            (head -n "$((line - 1))" "$sourcepath"
+            cat "$patch"
+            tail -n "+$line" $sourcepath)
             ;;
         append)
             cat "$sourcepath" "$patch" > "$destpath" || exit 1
             ;;
-        script) ;;
         copy)
             cp -a "$sourcepath" "$destpath" || exit 1
             ;;
@@ -140,8 +149,21 @@ main() {
             mkdir -p "$destpath"
             tar -C "$destpath" -x -f "$patch" || exit 1
             ;;
-        delete) ;;
-        link) ;;
+        delete)
+            if [ "$dest" = "orig" ]; then
+                echo rm -rf "$origpath" || exit 1
+            else
+                echo mknod "$destpath" c 0 0 || exit 1
+            fi
+            ;;
+        link)
+            ln -s "$from" "$destpath" || exit 1
+            ;;
+        script)
+            (cd "$patchdir"
+            chmod u+x "$patch"
+            "$patch" $sourcepath $destpath $head) || exit 1
+            ;;
         *)
             echo "Unknown patch type: $type"
             exit 1
