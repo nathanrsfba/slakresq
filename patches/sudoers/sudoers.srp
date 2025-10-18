@@ -1,4 +1,3 @@
-[slakresq]
 type=patch
 tree=10-console
 path=/etc/sudoers

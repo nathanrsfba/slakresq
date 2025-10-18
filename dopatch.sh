@@ -1,6 +1,38 @@
 #!/bin/sh
 
-main() {
+main()
+{
+    while getopts "o:dp" opt; do
+        case "$opt" in
+            o) export ORIG="$OPTARG";;
+            d) export DEBUG=1;;
+            *) exit 1 ;;
+        esac
+    done
+    shift $((OPTIND - 1))
+    if [ $DEBUG ]; then
+        echo "$ORIG"
+        echo "$DEBUG"
+        echo "$*"
+    fi
+
+    if [ "$1" = "" ]; then
+        find patches -name "*.srp" |
+            while read patch; do
+                applypatch "$patch" || exit 1
+            done
+        true
+    else
+        for patch in "$@"; do
+            applypatch "$patch"
+        done
+    fi
+}
+
+# Apply a patch file
+# $1: Patch file
+
+applypatch() {
     local patchfile="$1"
     local patchdir="`dirname "$patchfile"`"
 
@@ -87,9 +119,8 @@ main() {
     local sourcepath="$sourceroot/$orig"
     local origpath="$sourcepath"
 
-    # Path to the destination tree
     local destroot="trees/99-patches"
-    if [ "$dest" = "orig" ]; then
+    if [ "$dest" = "orig" -a -f "$sourcepath" ]; then
         destroot="$sourceroot"
         if [ "$from$replace" = "" ]; then
             cp "$sourcepath" "$TMP/orig"
@@ -101,16 +132,30 @@ main() {
 
 
     local destpath="$destroot/$path"
-    echo "Patch header: $head"
-    echo "Patch body: $patch"
-    echo "File base: $base"
-    echo "Target path: $path"
-    echo "Source path: $orig"
-    echo "Physical source root: $sourceroot"
-    echo "Physical source path: $sourcepath"
-    echo "Physical (original) source path: $origpath"
-    echo "Physical target root: $destroot"
-    echo "Physical target path: $destpath"
+    # If a patched file already exists in 99-patches, copy it to temp
+    # as the new source. (Patching a patch)
+    if [ "$dest" = "patches" -a -f "$destpath" ]; then
+        if [ "$from$replace" = "" ]; then
+            cp "$destpath" "$TMP/orig"
+            sourcepath="$TMP/orig"
+        else
+            echo "Patch conflicts with previous patch"
+        fi
+
+    fi
+
+    if [ $DEBUG ]; then
+        echo "Patch header: $head"
+        echo "Patch body: $patch"
+        echo "File base: $base"
+        echo "Target path: $path"
+        echo "Source path: $orig"
+        echo "Physical source root: $sourceroot"
+        echo "Physical source path: $sourcepath"
+        echo "Physical (original) source path: $origpath"
+        echo "Physical target root: $destroot"
+        echo "Physical target path: $destpath"
+    fi
     
     mkdir -p "`dirname "$destpath"`"
 
@@ -137,7 +182,8 @@ main() {
             fi
             (head -n "$((line - 1))" "$sourcepath"
             cat "$patch"
-            tail -n "+$line" $sourcepath)
+            tail -n "+$line" $sourcepath) > "$destpath"
+
             ;;
         append)
             cat "$sourcepath" "$patch" > "$destpath" || exit 1
@@ -199,4 +245,4 @@ cutpatch() {
     ) < "$1"
 }
 
-main "$1"
+main "$@"
