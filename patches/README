@@ -1,33 +1,56 @@
 Options in a patch file:
 
 * tree: The name of the tree the original appears in, or `base` if it's the
-  base tree. If the tree does not exist, the patch is ignored.
+  base tree. If the tree does not exist, the patch is ignored. If
+  `dest=patches` and `type` specifies an operation that doesn't require an
+  existing file, `tree` is not required.
 * path: The path to the file (or for some operations, directory) in question.
 * dir: The directory of the file in question. The filename will be taken from
   the base of the .srp file, appended to this directory, and then proceed as
   if said combination was provided as `path`.
 * from: The path to the *source* file to be patched, if it lives at a
-  different path than specified in `file`. Both the original and patched file
+  different path than specified in `path`. Both the original and patched file
   will appear in the final tree
 * replace: Same as `from` but the original will be removed from the final
   tree.
 * dest: One of the following:
+    * patches: The resulting file(s) will be placed in the 99-patches module.
+      This requires 99-patches to be rebuilt if a patch is added or modified.
+      This is the default setting.
     * orig: The resulting file(s) will be placed in the module the original
       appeared in. This requires the module to be rebuilt if a patch is added
       or modified.
-    * patches: The resulting file(s) will be placed in the 99-patches module.
-      This requires 99-patches to be rebuilt if a patch is added or modified.
-* external: The name of the file containing the patch content.
+* external: The name of the file containing the patch content, if it's not
+  included in the srp file
 * type: The type of modification to perform:
-    * patch: The content is a patch to be appilied using patch(1)
-    * prepend: Paste the content at the top of the original. If the original
-      has a hasbang at the top, the content is pasted just below it
+    * patch: The content is a patch to be appilied using patch(1). Patch is
+      applied as follows:
+      ```
+      patch <source> <patch> -o <destination>
+      ```
+    * insert: Insert the content somewhere into the original. The following
+      options will affect this:
+      * before: Content will be inserted before the first line that matches
+        the given (`grep -E` compatible) regex.
+      * after: Like `before`, but content is added *after* the matching line.
+      * skip: Content is added below the first *non*-matching line.
+      If none of these are specified, prepend the content at the top.
+      
+      Some useful examples:
+      * `skip='^#'`: Add the content after the first block of comments.
+      * `after='^$'`: Add the content after the first blank line.
     * append: Paste the content at the bottom of the original
     * new: The content is placed in the target in its entirety. This can be
       used to either insert a totally new file, or replace an existing file
       wholesale.
-    * script: The content is run as a script. (Details to follow: Arguments
-      and cwd?)
+    * script: The content is run as a script. The script gets the following
+      arguments:
+      * $1: The source file (which may be a blank string)
+      * $2: The destination file
+      * $3: A file containing the patch header from the .srp file, in case you
+        want to source it for further options
+      The script is run with the working directory set to the directory with
+      the srp file
     * copy: Copy the original file unchanged. This can be useful if you simply
       want to set file modes or ownership. If `from` or `replace` is provided,
       the file is effectively copied or renamed.
@@ -41,3 +64,12 @@ Options in a patch file:
 * chmod: Change the mode of the resulting file
 * owner: Change the owner of the resulting file
 * group: Change the group of the resulting file
+
+Some notes:
+
+If `dest=orig` and neither `from` nor `replace` is specified, the original
+file is first copied to a temporary location so the original copy can be safely
+overwritten. Likewise, if `dest=patches` and the file already exists in the
+`99-patches` tree, it is copied to a temporary location and used as the source
+file. This way, a later patch can patch a file that was patched by an earlier
+patch.
