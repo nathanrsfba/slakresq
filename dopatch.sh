@@ -77,6 +77,12 @@ applypatch() {
 
     . "$head"
 
+    if [ "$tree" != 'base' -a "$tree" != '' -a \
+        ! -e "trees/$tree" ]; then
+        echo "Skipping, tree $tree does not exist"
+        return
+    fi
+
     if [ "$path$dir" = "" ]; then
         echo "path or dir is required"
         exit 1
@@ -216,6 +222,16 @@ applypatch() {
             ;;
 
     esac
+
+    if [ "$chmod" != "" ]; then
+        chmod "$chmod" "$destpath" || exit 1
+    fi
+    if [ "$owner" != "" ]; then
+        chown "$owner" "$destpath" || exit 1
+    fi
+    if [ "$group" != "" ]; then
+        chgrp "$group" "$destpath" || exit 1
+    fi
 
 }
 
