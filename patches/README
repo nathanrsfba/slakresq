@@ -1,15 +1,32 @@
+This directory contains a set of patches to make a Slackware install amenable
+to running as a live distro, and to add features particular to SlakResQ.
+
+Patch files have an `srp` extension, and may live in any subdirectory within
+this directory. The patches may modify original Slackware files using the
+`patch` utility, or one of several other methods.
+
+A patch consists of a header containing options for the patch, in a form
+suitable for `source`-ing in `sh`. It also optionally contained a body, which
+contains the patch to be applied.
+
+The header lives at the start of the `srp` file. The body may either follow
+the header, with a line consisting entirely of hyphens (`-`) separating them,
+or in a separate file in the same directory, specified by the `external`
+option in the header. The latter is highly recommended for binary files. If
+no body is present, neither `external` nor separator is required.
+
 Options in a patch file:
 
 * tree: The name of the tree the original appears in, or `base` if it's the
   base tree. If the tree does not exist, the patch is ignored. If
   `dest=patches` and `type` specifies an operation that doesn't require an
-  existing file, `tree` is not required.
+  existing file (`new` for instance), `tree` is not required.
 * path: The path to the file (or for some operations, directory) in question.
 * dir: The directory of the file in question. The filename will be taken from
   the base of the .srp file, appended to this directory, and then proceed as
   if said combination was provided as `path`.
-* from: The path to the *source* file to be patched, if it lives at a
-  different path than specified in `path`. Both the original and patched file
+* from: The specified path will be used as the *source* file to be patched,
+  and the result will be placed at `path`. Both the original and patched file
   will appear in the final tree
 * replace: Same as `from` but the original will be removed from the final
   tree.
@@ -50,10 +67,10 @@ Options in a patch file:
       * $3: A file containing the patch header from the .srp file, in case you
         want to source it for further options
       The script is run with the working directory set to the directory with
-      the srp file
+      the srp file.
     * copy: Copy the original file unchanged. This can be useful if you simply
       want to set file modes or ownership. If `from` or `replace` is provided,
-      the file is effectively copied or renamed.
+      the file is effectively copied or renamed/moved.
     * tar: The content is a tar file that will be extracted to the path
       specified in the `path` parameter. In this case, `path` is expected to
       be a directory.
@@ -65,11 +82,14 @@ Options in a patch file:
 * owner: Change the owner of the resulting file
 * group: Change the group of the resulting file
 
-Some notes:
-
 If `dest=orig` and neither `from` nor `replace` is specified, the original
 file is first copied to a temporary location so the original copy can be safely
-overwritten. Likewise, if `dest=patches` and the file already exists in the
-`99-patches` tree, it is copied to a temporary location and used as the source
-file. This way, a later patch can patch a file that was patched by an earlier
-patch.
+overwritten.  This behavior can be inhibited by specifying something for
+`from`, like `/dev/null` for instance.
+
+Likewise, if `dest=patches` and the file already exists in the `99-patches`
+tree, it is copied to a temporary location and used as the source file. This
+way, a later patch can patch a file that was patched by an earlier patch. In
+this instance, if 'from' or 'replace' is specified, patching fails with an
+error, as it indicates two conflicting patches.
+
