@@ -19,4 +19,8 @@ initrd.img
 # Needed since my work directory is a mounted filesystem image
 lost+found
 
+# Some experimental stuff
+extra.cfg
 
+# btrfs snapshots for drebugging
+snaps*/
