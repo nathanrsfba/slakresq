@@ -1,6 +1,7 @@
 type=append
 tree=base
 path=etc/rc.d/rc.local
+chmod=755
 -----
 # Run some deferred setup tasks if necessary
 if [ -x /etc/rc.d/rc.firstrun ]; then

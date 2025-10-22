@@ -1,5 +1,6 @@
 type=new
 dir=/etc/rc.d
+chmod=755
 -----
 #!/bin/sh
 
