@@ -109,13 +109,15 @@ This will create a directory in trees/ for each bundle. You can modify the
 content of these file trees before compressing them into a squashfs image if
 you wish.
 
-There is also a 99-patches directory as well; this is a bundle that is loaded
-after everything else. It contains changes particular to SlakResQ, rather than
-modifying the original slackware disksets themselves. You can add your own
-changes to this as well if you so desire. You can also create another bundle
-in trees/ with your own additions in the same fashion.
+5) Run the applypatches script to create the 99-patches tree. This is a bundle
+that is loaded after everything else. It contains changes particular to
+SlakResQ, rather than modifying the original slackware disksets themselves. It
+is generated from the patches found in the patches/ directory; refer to the
+README within to see how it works -- you can add your own changes if you so
+desire. You can also create another bundle in trees/ with your own additions
+in the same fashion.
 
-5) Finally, you can run tools/squashbundle to compress each folder in trees/
+6) Finally, you can run tools/squashbundle to compress each folder in trees/
 into the appropriate bundle file in target/. You can specify which bundles you
 want to compress on the command line, or run it without parameters to compress
 all of them.
