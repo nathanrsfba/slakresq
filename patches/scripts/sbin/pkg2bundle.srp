@@ -1,0 +1,112 @@
+type=new
+dir=/sbin
+chmod=755
+-----
+#!/bin/sh
+
+TMP=''
+export LIB="/run/initramfs/lib/livekitlib"
+export CFG="/run/initramfs/lib/config"
+
+while getopts "t:l:c:Sf?" arg; do
+    case $arg in
+        t) TMP="$OPTARG" ;;
+        l) LIB="$OPTARG" ;;
+        c) CFG="$OPTARG" ;;
+        f) FORCE=1 ;;
+        S) SAVEFAIL=1 ;;
+        ?)
+            echo "Usage:"
+            echo "  $0 [-S] [-t tmp] [-l lib] [-c cfg] module packages..."
+            echo
+            echo "tmp: Directory for temporary workspace (defaults to a"
+            echo "  random directory in /tmp)"
+            echo "lib: Location of Linux Live library script (default $LIB)"
+            echo "cfg: Location of Linux Live config file (default $CFG)"
+            echo "module: Name of module to create. If no directory specified,"
+            echo "  places it in the boot media on the current live system"
+            echo "packages: Slackware packages to make into the given module"
+            echo ""
+            echo "-f: Overwrite module if it exists"
+            echo "-S: Save temporary workspace if failure occurs"
+            exit
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+if [ "$1" = "" ]; then
+    exec "$0" '-?'
+fi
+
+module=$1
+if [ "${module%.t?z}" != "$module" ]; then
+    # Looks like the user didn't specify a module. Try to create a module name
+    # from the first package given
+
+    module="`basename "$module"`"
+    module="`echo "$module" | sed 's?.*/??;s/\.t[bglx]z$//'`"
+    module="`echo "$module" | sed 's?-[^-]*-[^-]*-[^-]*$??'`"
+else
+    shift
+fi
+
+module="`createbundle -n "$module"`"
+if [ -e "$module" -a ! "$FORCE" ]; then
+    echo "$module already exists. Use -f to override"
+    exit 1
+fi
+
+if [ "$1" = "" ]; then
+    exec "$0" '-?'
+fi
+
+. "$CFG" || exit 1
+. "$LIB" || exit 1
+
+if [ "$TMP" = "" ]; then
+    TMP=`mktemp -t -d pkg2bundle.XXXXXXXX`
+fi
+
+if [ -e "$TMP" ]; then
+    if [ ! -d "$TMP" ]; then
+        echo "$TMP must be a directory"
+        exit 1
+    elif [ "`ls -A "$TMP"`" != "" ]; then
+        echo "$TMP must be empty"
+        exit 1
+    fi
+fi
+
+
+# Resolve the full path to the given package.
+resolvepkgs() {
+    for f in "$@"; do
+        # We have access to the underlying root FS inside the chroot, but we
+        # may have been given paths relative to a cwd that is lost after
+        # chroot, so we'll realpath the whole lot first
+        f="`realpath "$f"`"
+
+        # Access the package from the /outer directory, which is a bind mount
+        # of the real root. This ensures access to the package even if it's
+        # on another filesystem
+        f="/outer$f"
+
+        echo "$f"
+    done
+}
+
+resolvepkgs "$@" | tmproot -t "$TMP" -f /outer -s xargs -d '\n' \
+            /sbin/installpkg --terse
+if [ $? = 0 ]; then
+    echo create_bundle "$module" "$TMP/diff/data"
+    createbundle "$module" "$TMP/diff/data"
+fi
+
+if [ $? != 0 -a "$SAVEFAIL" ]; then
+    echo "Temporary files remain in $TMP"
+    exit 1
+fi
+
+tmproot -c -t "$TMP"
