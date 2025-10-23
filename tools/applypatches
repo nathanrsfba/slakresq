@@ -71,6 +71,7 @@ applypatch() {
     local chmod
     local owner
     local group
+    local cond
 
     local base="`basename "$patchfile"`"
     base="${base%.*}"
@@ -148,6 +149,15 @@ applypatch() {
             echo "Patch conflicts with previous patch"
         fi
 
+    fi
+
+    if [ "$cond" ]; then
+        echo "Conditional: $cond"
+        sh -c "$cond" /dev/null "$sourcepath"
+        if [ $? != 0 ]; then
+            echo "Skipped; conditional not met"
+            return
+        fi
     fi
 
     if [ $DEBUG ]; then

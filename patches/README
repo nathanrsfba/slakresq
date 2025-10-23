@@ -78,6 +78,10 @@ Options in a patch file:
       is `patches`, an appropriate entry will be generated in 99-patches to
       inhibit its appearance in the resulting filesystem.
     * link: A symbolic link will be created pointing `path` to `from`
+* cond: The provided shell command is run; if it returns failure, the patch is
+  skipped. The path to the original file is provided in $1. This may be used
+  to provide multiple versions of a patch for different conditions, such as
+  differing Slackware versions.
 * chmod: Change the mode of the resulting file
 * owner: Change the owner of the resulting file
 * group: Change the group of the resulting file
