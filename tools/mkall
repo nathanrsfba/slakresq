@@ -89,17 +89,24 @@ for bundle in ${!BUNDLE[@]}; do
                 update=1
             fi
         done
-        if [ "${BUNDLE[$bundle]}" = "" ]; then
+        if [ "$bundle" = "99-patches" ]; then
+            if [ "`find patches -newer $bfile -print -quit`" != "" ]; 
+            then
+                update=1
+            fi
+        elif [ "${BUNDLE[$bundle]}" = "" ]; then
             if [ "`find trees/$bundle -newer $bfile -print -quit`" != "" ]; 
             then
                 update=1
             fi
-
         fi
     fi
     if [ $update ]; then
         if [ "${BUNDLE[$bundle]}" != "" ]; then
             tools/extdiskset $bundle || exit 1
+        fi
+        if [ "$bundle" = "99-patches" ]; then
+            tools/applypatches
         fi
         tools/squashbundle $bundle || exit 1
     fi
