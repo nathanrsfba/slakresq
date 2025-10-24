@@ -65,4 +65,8 @@ result=$?
 
 (cd instenv ; umount var/log/mount dev/pts dev proc mnt) || exit 1
 
+echo "Applying any patches to base..."
+
+tools/applypatches -o base || exit 1
+
 exit $result
