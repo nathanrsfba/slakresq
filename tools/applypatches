@@ -14,9 +14,18 @@ main()
         echo "$ORIG"
         echo "$DEBUG"
         echo "$*"
+        dbgecho='echo'
+        redir=/dev/stdout
+    else
+        dbgecho='true'
+        redir=/dev/null
     fi
 
     if [ "$1" = "" ]; then
+        if [ "$ORIG" == "" ]; then
+            echo "Recreating patch tree..."
+            rm -rf trees/99-patches
+        fi
         find patches -name "*.srp" |
             while read patch; do
                 applypatch "$patch" || exit 1
@@ -36,7 +45,7 @@ applypatch() {
     local patchfile="$1"
     local patchdir="`dirname "$patchfile"`"
 
-    echo "$patchfile"
+    $dbgecho "Examining $patchfile"
 
     TMP="`mktemp -dt srpatch.$$.XXXXXXXX`" || exit 1
     trap cleanup EXIT
@@ -78,16 +87,38 @@ applypatch() {
 
     . "$head"
 
+    if [ "$dest" = orig -a "$tree" = "" ]; then
+        echo "$1: dest=orig requires tree to be set" 1>&2
+        exit 1
+    fi
+
+    if [ "$ORIG" != "" ]; then
+        if [ "$dest" != "orig" -o "$tree" != "$ORIG" ]; then
+            $dbgecho "Skipping, not the target tree" 1>&2
+            return 0
+        fi
+    else
+        if [ "$dest" != "patches" ]; then
+            $dbgecho "Skipping, not the target tree" 1>&2
+            return 0
+        fi
+    fi
+
     if [ "$tree" != 'base' -a "$tree" != '' -a \
         ! -e "trees/$tree" ]; then
-        echo "Skipping, tree $tree does not exist"
+        $dbgecho "Skipping, tree $tree does not exist" 1>&2
         return
     fi
 
+    # At this point we should be decided that we *are* applying this patch.
+    echo "$1"
+
     if [ "$path$dir" = "" ]; then
-        echo "path or dir is required"
+        echo "path or dir is required" 1>&2
         exit 1
     fi
+
+
     if [ "$external" != "" ]; then
         patch="$patchdir/$external"
     fi
@@ -106,11 +137,6 @@ applypatch() {
     fi
     if [ "$replace" != "" ]; then
         orig="$replace"
-    fi
-
-    if [ "$dest" = orig -a "$tree" = "" ]; then
-        echo 'dest=orig requires tree to be set'
-        exit 1
     fi
 
     # Path to the given tree, relatve to slakresq build tree
@@ -146,16 +172,16 @@ applypatch() {
             cp "$destpath" "$TMP/orig"
             sourcepath="$TMP/orig"
         else
-            echo "Patch conflicts with previous patch"
+            echo "Patch conflicts with previous patch" 1>&2
         fi
 
     fi
 
     if [ "$cond" ]; then
-        echo "Conditional: $cond"
+        $dbgecho "Conditional: $cond" 1>&2
         sh -c "$cond" /dev/null "$sourcepath"
         if [ $? != 0 ]; then
-            echo "Skipped; conditional not met"
+            $dbgecho "Skipped; conditional not met"
             return
         fi
     fi
@@ -175,7 +201,7 @@ applypatch() {
     
     mkdir -p "`dirname "$destpath"`"
 
-    case "$type" in
+    (case "$type" in
         patch)
             patch "$sourcepath" "$patch" -o "$destpath" || exit 1
             ;;
@@ -213,9 +239,9 @@ applypatch() {
             ;;
         delete)
             if [ "$dest" = "orig" ]; then
-                echo rm -rf "$origpath" || exit 1
+                rm -rf "$origpath" || exit 1
             else
-                echo mknod "$destpath" c 0 0 || exit 1
+                mknod "$destpath" c 0 0 || exit 1
             fi
             ;;
         link)
@@ -227,11 +253,15 @@ applypatch() {
             "$patch" $sourcepath $destpath $head) || exit 1
             ;;
         *)
-            echo "Unknown patch type: $type"
+            echo "Unknown patch type: $type" 1>&2
             exit 1
             ;;
 
-    esac
+    esac) > $redir
+    if [ $? != 0 ]; then
+        echo "Patch failed." 1>&2
+        exit 1
+    fi
 
     if [ "$chmod" != "" ]; then
         chmod "$chmod" "$destpath" || exit 1
