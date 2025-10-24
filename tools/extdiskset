@@ -61,6 +61,10 @@ echo "Cleaning up..."
 # Unmount everything
 umount merged/dev/pts merged/dev merged/proc merged/mnt/hd merged || exit 1
 
+if [ $result != 0 ]; then
+    exit $result
+fi
+
 echo "Applying any patches..."
 
 tools/applypatches -o "$bundle" || exit 1
