@@ -1,6 +1,12 @@
 #!/bin/bash
 
+# Include configs
 . config || exit 1
+
+# Include local overrids if present
+if [ -e config.local ]; then
+    . config.local
+fi
 
 # Test the truth of an argument
 # Recognized boolean truths: 1, TRUE, T, YES, Y, ON
