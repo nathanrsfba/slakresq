@@ -2,6 +2,9 @@
 *~
 .*.swp
 
+# Local stuff
+/config.local
+
 # Stuff generated during builds
 /base
 /diff
