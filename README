@@ -109,6 +109,11 @@ This will create a directory in trees/ for each bundle. You can modify the
 content of these file trees before compressing them into a squashfs image if
 you wish.
 
+4.5) If you want to install any of the 'extra' packages specified in `config`,
+uncomment the desired ones (or add custom ones), then run `tools/fetchextras`.
+You can run `extdiskset` on them similarly to the regular bundles, except the
+"disksets" live in the `extras` subdirectory of `install`.
+
 5) Run the applypatches script to create the 99-patches tree. This is a bundle
 that is loaded after everything else. It contains changes particular to
 SlakResQ, rather than modifying the original slackware disksets themselves. It
@@ -125,6 +130,99 @@ all of them.
 This will add the bundles to the existing live system in target/, so you can
 make changes to a single bundle and re-compress it without having to recreate
 the whole system.
+
+## Installing Additional Software ##
+
+While the `install` directory by default contains the official Slackware
+install disksets, you can add your own "disksets" to this directory and
+populate them with Slackware packages to include additional software. You can
+use `extdiskset` and `squashbundle` to install them as if they were an
+official diskset. You can even add them to one of the `BUNDLE` entries (or a
+new one) in `config` and they'll get installed by `mkall` as if they were part
+of Slackware.
+
+## Installing Extras ##
+
+The installer scripts now have the ability to build third-party packages (and
+also the extras in the Slackware extras folder) in an automated way, similar
+to the regular bundles.
+
+To enable extras, edit `config` and comment or uncomment the desired extras as
+desired, or add additional ones. Each "extra" installs to its own "diskset",
+in the `extras` subfolder in the `install` directory.
+
+Each "extra" entry consists of a bundle name (similar to the regular bundles),
+and a list of sources to download packages from. Each extra bundle is
+installed as with the name of the diskset equal to the name of the bundle,
+minues the numeric prefix. These disksets can be installed into bundles using
+`extdiskset` and `squashbundle` in the same way as the regular bundles, with
+the caveat that if you specify the disksets on the command line, the "diskset"
+name must include the "extras" subfolder.
+
+So, the sbotools extra can be specified in the configuration like so:
+
+```
+EXTRA[11-sbotools]="https://pink-mist.github.io/sbotools/downloads/sbotools-2.7-noarch-1_SBo.tgz"
+```
+
+`fetchextras` will create a "diskset" in `install/extras/sbotools`, and it can be
+prepared like so:
+
+```
+tools/extdiskset 11-sbotools
+```
+
+Or, to specify the specific "diskset":
+
+```
+tools/extdiskset 11-sbotools extras/sbotools
+```
+
+Followed by
+```
+tools/squashbundle 11-sbotools
+```
+
+`mkall` will also do this with any enabled extras.
+
+Supported extra sources include:
+
+ * http, https, and ftp URLs. These can point to a file, or a directory. In
+   the case of a file, this should be a Slackware package, and it will be
+   downloaded into the appropriate diskset folder. In the case of a directory,
+   all packages in the specified directory will be downloaded into the folder.
+   The sbotools extra above is an example of a single file. Another example,
+   this time a directory, is the Cinnamon build on slackware.uk:
+
+   `EXTRA[95-cinnamon]="https://slackware.uk/csb/$SLACKVERSION/$ARCH/"`
+
+   Note that $SLACKVERSION and $ARCH are variables that are also defined in
+   `config`.
+
+ * Extras from the Slackware extras folder. These can be specified as `extra:`
+   followed by either a package name, or a directory followed by a `/`. For
+   example:
+
+   ```
+   EXTRA[11-vnc]="extra:fltk/ extra:tigervnc/"
+   EXTRA[21-samba]="extra:samba"
+   ```
+
+   The first downloads the packages from two directories to make a VNC
+   diskset; the second downloads the Samba 4.22.6 package.
+
+   Note that some extras are packaged as single files, and some are packaged
+   in subdirectories. `fetchextras` doesn't know which is which ahead of time,
+   thus the need to explicitly mark directories.
+
+ * AlienBob packages. These are downloaded from
+   [http://www.slackware.com/~alien/slackbuilds]. These can be specified as
+   `alien:` followed by the name of subdirectory in the AlienBob repo. For
+   example:
+
+   ```
+   EXTRA[91-chromium]="alien:chromium"
+   ```
 
 ## SlakResQ Tweaks ##
 
@@ -157,6 +255,10 @@ diff
 install
     Slackware install disksets. You will need to provide these for whatever
     packages you want in your install
+install/extras
+    Third-party packages that can be included in a SlakResQ install. The
+    `BUNDLE` array in `config` specifies how these are built into bundles
+    specifies how these are built into bundles.
 instenv
     The Slackware installer is extracted and run in here. This can be safely
     deleted once the base/ directory is created.
