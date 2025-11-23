@@ -38,3 +38,21 @@ checklive() {
     echo "Fetching live submodule..."
     git submodule update --init
 }
+
+# Add contents of $EXTRA[] to $BUNDLE[]
+extras2bundles() {
+    for extra in ${!EXTRA[*]}; do
+        diskset=${extra#*-}
+        BUNDLE[$extra]=extras/$diskset
+    done
+}
+
+# Determine the path (relative to mirror root) to the disksets
+disksetpath() {
+    local suf=''
+    if [ $ARCH = x86_64 ]; then
+        suf=64
+    fi
+
+    echo "slackware$suf-$SLACKVERSION/slackware$suf"
+}

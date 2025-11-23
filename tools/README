@@ -59,6 +59,11 @@ fetchupdates
     Downloads updates from the configured mirror site. Unlike fetchinstall,
     this *does* attempt to update an existing updates directory
 
+fetchextras
+    Downloads configured "extras" -- third-party packages to include in the
+    SlakResQ install. These are installed in the install/extras folder, and
+    each is packaged into its own bundle.
+
 finddupes
     This displays a list of all files that appear in multiple bundle trees.
     You may wish to run this before squashing the bundles, and examining the

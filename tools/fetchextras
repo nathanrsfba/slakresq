@@ -1,0 +1,80 @@
+#!/bin/bash
+
+. config || exit 1
+. tools/srqlib || exit 1
+
+main() {
+    mkdir -p extras || exit 1
+
+    for extra in ${!EXTRA[@]}; do
+        name=${extra#*-}
+        path="install/extras/$name"
+
+        if [ ! -d "$path" ]; then
+            echo "Downloading extra $name..."
+            for url in ${EXTRA[$extra]}; do
+                schema=${url%%:*}
+                location=${url#*:}
+                func="get_$schema"
+                if [ "`type -t $func`" != 'function' ]; then
+                    echo "Invalid url: $url"
+                    exit 1
+                fi
+
+                mkdir -p "$path"
+                (cd "$path" && $func "$location") || exit 1
+            done
+
+        fi
+    done
+}
+
+# if [[ "$(type -t my_function)" = "function" ]]; then
+
+get_wget() {
+    if [ "${1:0-1}" = "/" ]; then
+        # Download directory recursively
+        wget -nd -r -np -A "*.t?z" "$1"
+    else
+        # Download single file
+        wget "$1"
+        
+    fi
+}
+get_http() {
+    get_wget "http:$1"
+}
+get_https() {
+    get_wget "https:$1"
+}
+get_ftp() {
+    get_wget "ftp:$1"
+}
+get_alien() {
+    # http://www.slackware.com/~alien/slackbuilds/$PACKAGE/<pkg|pkg64>/$SLACKVERSION/
+    if [ "$ARCH" = "x86" ]; then
+        pkgdir='pkg'
+    else
+        pkgdir='pkg64'
+    fi
+    get_wget "http://www.slackware.com/~alien/slackbuilds/$1/$pkgdir/$SLACKVERSION/"
+}
+get_extra() {
+    local disksetpath="`disksetpath`"
+    local mirrorbase="`dirname $MIRROR/"$disksetpath"`"
+    local extrapath="$mirrorbase/extra"
+
+    # Extras might be a file or a directory.
+    if [ "${1:0-1}" = "/" ]; then
+        # If it's a directory, download the packages within as if it
+        # was a directory URL
+        get_wget "$extrapath/$1"
+    else
+        # Otherwise, get a file with the appropriate windcard
+        wget -nd -r -np "$extrapath/$1-*.t?z"
+    fi
+
+
+}
+
+main "$@"

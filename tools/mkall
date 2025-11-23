@@ -7,30 +7,63 @@ checklive || exit 1
 
 checkroot || exit 1
 
-# Get install media, if requested
-if istrue $FETCHINSTALL; then
-    tools/fetchinstall || exit 1
-else
-    if [ ! -d install/a ]; then
-        echo "No disksets are present in the install/ directory. Either populate it"
-        echo "from the Slackware mirrors, or enable FETCHINSTALL in the config"
-        echo "to download it automatically"
+while getopts "vch" flag; do
+    case $flag in
+        v) VERBOSE=1 ;;
+        c)
+            CHECK=1
+            VERBOSE=1
+            ;;
+        *)
+            echo "$0 [-v] [-c]"
+            echo
+            echo "Make whatever is out of date"
+            echo
+            echo "-v: Increase verbosity"
+            echo "-c: Check if anything is out of date and exit"
+            exit
+            ;;
+    esac
+done
+
+# Echo if verbose
+vecho() {
+    if [ $VERBOSE ]; then
+        echo "$@"
+    fi
+    if [ $CHECK ]; then
         exit 1
     fi
-fi
+}
 
-# Check for updates, if requested
-if istrue $FETCHUPDATES; then
-    tools/fetchupdates || exit 1
-fi
+extras2bundles
 
-# Apply updates, if appropriate
-if istrue $INSTALLUPDATES; then
-    if [ ! -d updates ]; then
-        echo "Requested updates, but no updates present. Skipped."
+if [ ! $CHECK ]; then
+    # Get install media, if requested
+    if istrue $FETCHINSTALL; then
+        tools/fetchinstall || exit 1
     else
-        echo "Installing any pending updates..."
-        tools/updatepkgs || exit 1
+        if [ ! -d install/a ]; then
+            echo "No disksets are present in the install/ directory. Either populate it"
+            echo "from the Slackware mirrors, or enable FETCHINSTALL in the config"
+            echo "to download it automatically"
+            exit 1
+        fi
+    fi
+
+    # Check for updates, if requested
+    if istrue $FETCHUPDATES; then
+        tools/fetchupdates || exit 1
+    fi
+
+    # Apply updates, if appropriate
+    if istrue $INSTALLUPDATES; then
+        if [ ! -d updates ]; then
+            echo "Requested updates, but no updates present. Skipped."
+        else
+            echo "Installing any pending updates..."
+            tools/updatepkgs || exit 1
+        fi
     fi
 fi
 
@@ -40,29 +73,36 @@ if [ -e "$core" ]; then
     # Check if the disksets for core have changed
     for diskset in $CORE_DISKSETS; do
         if [ "`find install/$diskset -newer $core -print -quit`" != "" ]; then
+            vecho "Core out of date"
             UPDATE_BASE=1
         fi
     done 
     if [ ! -e base ]; then
+        vecho "Base does not exist"
         UPDATE_BASE=1
     fi
     if [ ! $UPDATE_BASE ]; then
         if [ "`find base -newer $core \! -regex "base/tmp\\(/.*\\)?" -print -quit`" != "" ]; then
+            vecho "Base out of date"
             REPACK_BASE=1
         fi
     fi
 else
+    vecho "Core does not exist"
     UPDATE_BASE=1
 fi
 
 # See if boot files need updating
 ramfs="target/$LIVEKITNAME/boot/initrfs.img"
 if [ ! -e "$ramfs" ]; then
+    vecho "initramfs non-existent"
     UPDATE_BOOT=1
 elif [ live/livekitlib -nt "$ramfs" ]; then
+    vecho "Live kit library updated"
     UPDATE_BOOT=1
 else
     if [ "`find live/{initramfs,bootfiles} -newer $ramfs -print -quit`" != "" ]; then
+        vecho "initramfs out of date"
         UPDATE_BOOT=1
     fi
 fi
@@ -77,26 +117,31 @@ elif [ $UPDATE_BOOT ]; then
 fi
 
 # See if any bundles need updating
+
 for bundle in ${!BUNDLE[@]}; do
     bfile="target/$LIVEKITNAME/$bundle.$BEXT"
     update=''
     if [ ! -e $bfile ]; then
         update=1
+        vecho "Bundle $bfile non-existent"
     else
         for diskset in ${BUNDLE[$bundle]}; do
             if [ "`find install/$diskset -newer $bfile -print -quit`" != "" ] 
             then
+                vecho "Bundle $bfile out of date"
                 update=1
             fi
         done
         if [ "$bundle" = "99-patches" ]; then
             if [ "`find patches -newer $bfile -print -quit`" != "" ]; 
             then
+                vecho "Bundle $bfile out of date"
                 update=1
             fi
         elif [ "${BUNDLE[$bundle]}" = "" ]; then
             if [ "`find trees/$bundle -newer $bfile -print -quit`" != "" ]; 
             then
+                vecho "Bundle $bfile out of date"
                 update=1
             fi
         fi

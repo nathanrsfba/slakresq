@@ -1,12 +1,13 @@
 #!/bin/bash
 
 . config || exit 1
+. tools/srqlib || exit 1
 
 disksets="$CORE_DISKSETS ${BUNDLE[@]}"
 
 mkdir -p install || exit 1
 
-path="$MIRROR/$VERSION"
+path="$MIRROR/`disksetpath`"
 
 for diskset in $disksets; do
     if [ ! -d install/$diskset ]; then

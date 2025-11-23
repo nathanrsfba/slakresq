@@ -12,6 +12,8 @@ fi
 
 checkroot || exit 1
 
+extras2bundles
+
 bundle=$1
 shift
 disksets="$*"
