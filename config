@@ -54,7 +54,7 @@ BUNDLE[99-patches]=""
 #EXTRA[91-chromium]="alien:chromium"
 
 # TigerVNC
-EXTRA[11-vnc]="extra:fltk/ extra:tigervnc/"
+#EXTRA[11-vnc]="extra:fltk/ extra:tigervnc/"
 
 # Samba 4.22
 #EXTRA[21-samba]="extra:samba"
