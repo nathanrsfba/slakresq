@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Declare arrays for configs...
+declare -A BUNDLE 
+declare -A EXTRA
+
 # Include configs
 . config || exit 1
 
