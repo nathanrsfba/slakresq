@@ -2,7 +2,6 @@
 
 # Make the bundle for the given trees, default everything
 
-. config || exit 1
 . live/config || exit 1
 . live/livekitlib || exit 1
 . tools/srqlib || exit 1

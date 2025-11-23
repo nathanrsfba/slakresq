@@ -1,7 +1,6 @@
 #!/bin/bash
 
 . live/config || exit 1
-. config || exit 1
 . tools/srqlib || exit 1
 
 

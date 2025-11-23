@@ -1,6 +1,5 @@
 #!/bin/bash
 
-. config || exit 1
 . tools/srqlib || exit 1
 
 disksets="$CORE_DISKSETS ${BUNDLE[@]}"

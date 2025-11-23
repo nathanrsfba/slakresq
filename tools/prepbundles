@@ -2,7 +2,7 @@
 
 # Extract files for all configured bundles into trees/
 
-. config || exit 1
+. tools/srqlib || exit 1
 
 checkroot || exit 1
 
