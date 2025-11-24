@@ -50,14 +50,22 @@ get_ftp() {
     get_wget "ftp:$1"
 }
 get_alien() {
-    # http://www.slackware.com/~alien/slackbuilds/$PACKAGE/<pkg|pkg64>/$SLACKVERSION/
+    local base="http://www.slackware.com/~alien/slackbuilds"
+    if [ "$2" != "" ]; then
+        base="$2"
+    fi
+
+    local pkgdir='pkg64'
     if [ "$ARCH" = "x86" ]; then
         pkgdir='pkg'
-    else
-        pkgdir='pkg64'
     fi
-    get_wget "http://www.slackware.com/~alien/slackbuilds/$1/$pkgdir/$SLACKVERSION/"
+
+    get_wget "$base/$1/$pkgdir/$SLACKVERSION/"
 }
+get_alienrestricted() {
+    get_alien "$1" "http://slackware.nl/people/alien/restricted_slackbuilds"
+}
+
 get_extra() {
     local disksetpath="`disksetpath`"
     local mirrorbase="`dirname $MIRROR/"$disksetpath"`"

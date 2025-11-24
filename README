@@ -224,6 +224,11 @@ Supported extra sources include:
    EXTRA[91-chromium]="alien:chromium"
    ```
 
+   Note that this does not attempt to recursively download dependencies.
+
+ * AlienBob restricted packages. As above, but from the "restricted"
+   repository at [http://slackware.nl/people/alien/restricted_slackbuilds]
+
 ## SlakResQ Tweaks ##
 
 The following tweaks are made to the base Slackware install (via the
