@@ -227,7 +227,12 @@ Supported extra sources include:
    Note that this does not attempt to recursively download dependencies.
 
  * AlienBob restricted packages. As above, but from the "restricted"
-   repository at [http://slackware.nl/people/alien/restricted_slackbuilds]
+   repository at [http://slackware.nl/people/alien/restricted_slackbuilds].
+   Use `alienrestricted:` to specify:
+
+   ```
+   EXTRA[11-tt]="alienrestricted:tt"
+   ```
 
 ## SlakResQ Tweaks ##
 

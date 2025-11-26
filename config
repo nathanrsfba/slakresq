@@ -30,6 +30,7 @@ BUNDLE[99-patches]=""
 # Third-party packages
 # Supported sources:
 #   alien: AlienBob package repo. Simpy specfiy the name of the package
+#   alienrestricted: AlienBob restricted package repo.
 #   extra: Packages from the Slackware extras directory. If it's a file,
 #     provide the package name. If it lives in a subdirectory, specify the
 #     directory, suffixed by a /
@@ -48,6 +49,9 @@ BUNDLE[99-patches]=""
 
 # Chromium
 #EXTRA[91-chromium]="alien:chromium"
+
+# Tetris for terminals
+#EXTRA[11-tt]="alienrestricted:tt"
 
 # TigerVNC
 #EXTRA[11-vnc]="extra:fltk/ extra:tigervnc/"
