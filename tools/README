@@ -80,6 +80,7 @@ mkall
 
     * Downloads disksets that don't exist, if enabled (fetchinstall)
     * Downloads current updates, if enabled (fetchupdates)
+    * Downloads extra packages, if enabled (fetchextras)
     * Applies any new updates, if enabled (updatepkgs)
     * If any of the core disksets have changed, rebuild base/ (mkbase)
     * If any of base/ has changed, recreate the core module (buildlive)
@@ -89,6 +90,13 @@ mkall
       if so (extdiskset && squashbundle)
     * Checks any bundle that isn't created from disksets (like 99-patches) for
       changes, and recompresses them (squashbundle)
+
+    mkall takes two command line options:
+    * `-v` increases verbosity, mainly showing *why* it's building a
+      particular thing
+    * `-c` checks to see if anything needs to be built. If not, exits with
+      return code 0. Otherwise, returns with 1, and a message showing the
+      first thing it found that needs rebuilding.
 
 prepbundles
     Runs extdiskset for all bundles defined in config
